@@ -259,7 +259,7 @@ class Sensors {
   // such as when starting the robot by putting your hand in front
 
   bool occluded_left() {
-    return lfs.raw > 100 && sensors.rfs.raw < 100;
+    return lfs.raw > 100; // && sensors.rfs.raw < 100;
   }
 
   bool occluded_right() {
@@ -284,6 +284,7 @@ class Sensors {
     enable();
     uint8_t choice = NO_START;
     while (choice == NO_START) {
+      Serial.println(choice);
       int count = 0;
       while (occluded_left()) {
         count++;
