@@ -750,6 +750,37 @@ class Mouse {
     sensors.disable();
   }
 
+/***
+   * A basic function to let you test the configuration of the encoder.
+   *
+   * Moves forward 1m and stops. Using this you can adjust the wheel
+   * diameter to ensure it's going the correct distance
+   *
+   */
+  void test_forward_1m() {
+    uint8_t side = sensors.wait_for_user_start();
+    motion.reset_drive_system();
+    sensors.set_steering_mode(STEERING_OFF);
+    // move to the boundary with the next cell
+    float distance = 990;
+    reporter.report_profile_header();
+    float start_position = encoders.robot_distance();
+    motion.start_move(distance, SEARCH_TURN_SPEED, SEARCH_TURN_SPEED, SEARCH_ACCELERATION);
+    while (not motion.move_finished()) {
+      reporter.report_profile();
+    }
+    motion.stop_after(10);
+
+    Serial.println();
+    delay(200); // Ensure stopped
+
+    Serial.print("Distance travelled: ");
+    Serial.println(encoders.robot_distance() - start_position);
+
+    motion.reset_drive_system();
+    sensors.set_steering_mode(STEERING_OFF);
+  }
+
  private:
   Heading m_heading;
   Location m_location;

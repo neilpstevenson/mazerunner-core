@@ -30,8 +30,8 @@
 // wall sensor thresholds and constants
 // RAW values for the front sensor when the robot is backed up to a wall
 // with another wall ahead
-const int FRONT_LEFT_CALIBRATION = 130; // 200
-const int FRONT_RIGHT_CALIBRATION = 130; //200
+const int FRONT_LEFT_CALIBRATION = 169; //130; // 200
+const int FRONT_RIGHT_CALIBRATION = FRONT_LEFT_CALIBRATION; // Single sensor
 // RAW values for the side sensors when the robot is centered in a cell
 // and there is no wall ahead
 const int LEFT_CALIBRATION = 167;
@@ -40,8 +40,8 @@ const int RIGHT_CALIBRATION = 170;
 // The front linear constant is the value of k needed to make the function
 // sensors.get_distance(sensor,k) return 68 when the mouse is backed up
 // against a wall with only a wall ahead
-const int FRONT_LINEAR_CONSTANT = 1030;
-const int FRONT_REFERENCE = 260;  // 560; // reading when mouse centered with wall ahead
+const int FRONT_LINEAR_CONSTANT = 700; //1030;    // Only used in debug!!
+const int FRONT_REFERENCE = 290; //260;  // 560; // reading when mouse centered with wall ahead
 
 // SS90E turn thresholds. This is the front sum reading to trigger a turn
 // it changes a bit if there is an adjacent wall. The threshold is set for
@@ -249,7 +249,7 @@ const float RIGHT_SCALE = (float)SIDE_NOMINAL / RIGHT_CALIBRATION;
 // the values above which, a wall is seen
 const int LEFT_THRESHOLD = 40;   // minimum value to register a wall
 const int RIGHT_THRESHOLD = 40;  // minimum value to register a wall
-const int FRONT_THRESHOLD = 60; //19;  // minimum value to register a wall
+const int FRONT_THRESHOLD = 70; //19;  // minimum value to register a wall
 
 // the distance through the cell at which the corresponding sensor
 // will see a falling edge

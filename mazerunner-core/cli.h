@@ -381,6 +381,9 @@ class CommandLineInterface {
       case 8:
         mouse.conf_log_front_sensor();
         break;
+      case 9:
+        mouse.test_forward_1m();
+        break;
       default:
         // just to be safe...
         sensors.disable();
@@ -423,8 +426,8 @@ class CommandLineInterface {
     Serial.println(F("       5 = Test SS90F Turn"));
     Serial.println(F("       6 = Test Edge Detect Position"));
     Serial.println(F("       7 = Sensor Spin Calibration"));
-    Serial.println(F("       8 = "));
-    Serial.println(F("       9 = "));
+    Serial.println(F("       8 = Test front sensor"));
+    Serial.println(F("       9 = Test move 1m"));
     Serial.println(F("      10 = "));
     Serial.println(F("      11 = "));
     Serial.println(F("      12 = "));
