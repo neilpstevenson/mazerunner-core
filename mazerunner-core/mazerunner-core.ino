@@ -10,10 +10,11 @@
  ******************************************************************************/
 
 #include <Arduino.h>
+#include "config.h"
+//#include "indicators.h"
 #include "adc.h"
 #include "battery.h"
 #include "cli.h"
-#include "config.h"
 #include "encoders.h"
 #include "maze.h"
 #include "motion.h"
@@ -42,6 +43,7 @@ Maze maze PERSISTENT;                     // holds maze map (even after a reset)
 Mouse mouse;                              // all the main robot logic is here
 CommandLineInterface cli;                 // user interaction on the serial port
 Reporter reporter;                        // formatted reporting of robot state
+//Indicators indicators;                    // More complex indicators/display
 
 /******************************************************************************/
 
@@ -49,7 +51,7 @@ Reporter reporter;                        // formatted reporting of robot state
 // because the callbacks are assigned though the Arduino API
 // Other interrupt service routines are defined here for want of
 // a better place to put them
-
+/*
 ISR(ADC_vect) {
   adc.callback_adc_isr();
 }
@@ -57,15 +59,25 @@ ISR(ADC_vect) {
 ISR(TIMER2_COMPA_vect, ISR_NOBLOCK) {
   systick.update();
 }
+*/
 
 /******************************************************************************/
 void setup() {
-  Serial.begin(BAUDRATE);
-  // redirectPrintf(); // send printf output to Serial (uses 20 bytes RAM)
-  pinMode(LED_USER, OUTPUT);
-  digitalWrite(LED_USER, 0);
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, 0);
+  Serial.begin(BAUDRATE); // Need to do this always, else it prevents the USB programmer/bootloader being available
+#ifdef USE_USB_SERIAL_PORT 
+  delay(1000);      // Allow any USB SerialPort to be established
+  redirectPrintf(); // send printf output to SerialPort (uses 20 bytes RAM)
+#else
+  // Also the serial port
+  SerialPort.begin(BAUDRATE);
+#endif
+
+  pinMode(LED_LEFT_IO, OUTPUT);
+  digitalWrite(LED_LEFT_IO, 0);
+  pinMode(LED_RIGHT_IO, OUTPUT);
+  digitalWrite(LED_RIGHT_IO, 0);
+  //pinMode(SWITCH_GO_PIN, INPUT_PULLUP);
+  //pinMode(SWITCH_SELECT_PIN, INPUT_PULLUP);
   adc.begin();
   motors.begin();
   encoders.begin();
@@ -76,29 +88,48 @@ void setup() {
   if (switches.button_pressed()) {
     maze.initialise();
     mouse.blink(2);
-    Serial.println(F("Maze cleared"));
+    SerialPort.println(F("Maze cleared"));
     switches.wait_for_button_release();
   }
+  else
+  {
+    // Quick flash to signal all ok
+    //indicators.blink(1, 0, 16, 0);
+  }
+  //switches.show_select_state();
   /// leave the emitters off unless we are actually using the sensors
   /// less power, less risk
   sensors.disable();
   maze.set_goal(GOAL);
-  reporter.set_printer(Serial);
-  Serial.println();
-  Serial.println(F(CODE));
-  Serial.println(F(NAME));
-  Serial.println(F("RDY"));
+  reporter.set_printer(SerialPort);
+  SerialPort.println();
+  SerialPort.println(F(CODE));
+  SerialPort.println(F(NAME));
+  SerialPort.println(F("RDY"));
   cli.prompt();
 }
 
 /// the main loop exists only to initiate tasks either as a result
-/// of pressing the button or sending a command through the serial port
+/// of pressing the button or sending a command through the SerialPort port
 void loop() {
+  /*
+  while(1)
+  {
+    Serial.print(encoder_l.count());
+    Serial.print(" ");
+    Serial.println(encoder_r.count());
+    delay(20);
+  }
+  */
   if (switches.button_pressed()) {
     switches.wait_for_button_release();
     int function = switches.read();
     cli.run_function(function);
+    //switches.show_select_state();
   } else if (cli.read_serial()) {
     cli.interpret_line();
+  } else {
+    switches.update();
+    delay(2);
   }
 }

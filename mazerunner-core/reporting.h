@@ -74,7 +74,7 @@ const char hdg_letters[] = "NESW";
 
 #define case_print(x)      \
   case (x):                \
-    Serial.println(F(#x)); \
+    SerialPort.println(F(#x)); \
     break;
 
 // and use a case statement to display the output
@@ -86,7 +86,7 @@ void print_name(int operation) {
     case_print(OP_MAKE_MOVE);
     case_print(OP_STOP);
     default:
-      Serial.println(F("UNKNOWN"));
+      SerialPort.println(F("UNKNOWN"));
   }
 }
 */
@@ -95,7 +95,7 @@ void print_name(int operation) {
 enum MazeView { PLAIN, COSTS, DIRS };
 //***************************************************************************//
 
-static Stream& printer = Serial;
+static Stream& printer = SerialPort;
 
 class Reporter;
 extern Reporter reporter;
@@ -412,6 +412,7 @@ class Reporter {
 #define POST 'o'
 #define ERR '?'
 #define GAP F("   ")
+#define TARG F(" X ")
 #define H_WALL F("---")
 #define H_EXIT F("   ")
 #define H_UNKN F("···")
@@ -483,6 +484,8 @@ class Reporter {
           printer.print(' ');
           printer.print(arrow);
           printer.print(' ');
+        } else if (location == GOAL) {
+          printer.print(TARG);
         } else {
           printer.print(GAP);
         }

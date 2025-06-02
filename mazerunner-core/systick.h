@@ -1,3 +1,4 @@
+#include "cmsis_os2.h"
 /******************************************************************************
  * Project: mazerunner-core                                                   *
  * -----                                                                      *
@@ -11,6 +12,7 @@
 
 #ifndef SYSTICK_H
 #define SYSTICK_H
+#include <mbed.h>
 #include "Arduino.h"
 #include "adc.h"
 #include "config.h"
@@ -18,11 +20,27 @@
 #include "motors.h"
 #include "sensors.h"
 #include "switches.h"
+using namespace std::chrono;
+
 class Systick {
+ private:
+  mbed::Ticker ticker;
+  rtos::Thread tickerThread;
+  rtos::EventFlags tickerEvents;
+
  public:
+  Systick() : tickerThread(osPriorityRealtime)
+  {}
+
   // don't let this start firing up before we are ready.
   // call the begin method explicitly.
   void begin() {
+    // Start a 500Hz ticker
+    //ticker.attach(update, 2ms);
+    ticker.attach({this, &Systick::tickerTick}, 2ms);
+    // And a thread that will run on each tick
+    tickerThread.start({this, &Systick::tickerRun});
+  /*
     // set
     bitClear(TCCR2B, WGM22);
     bitClear(TCCR2A, WGM20);
@@ -33,6 +51,7 @@ class Systick {
     bitSet(TCCR2B, CS20);
     OCR2A = 249;  // (16000000/128/500)-1 => 500Hz
     bitSet(TIMSK2, OCIE2A);
+    */
     delay(40);  // make sure it runs for a few cycles before we continue
   }
   /***
@@ -61,7 +80,7 @@ class Systick {
    *
    *
    */
-  void update() {
+  static void update() {
     // digitalWriteFast(LED_BUILTIN, 1);
     // NOTE - the code here seems to get inlined and so the function is 2800 bytes!
     // grab the encoder values first because they will continue to change
@@ -73,6 +92,19 @@ class Systick {
     motors.update_controllers(motion.velocity(), motion.omega(), sensors.get_steering_feedback());
     adc.start_conversion_cycle();
     // NOTE: no code should follow this line;
+  }
+
+  void tickerTick() {
+      // Trigger ticker update
+      tickerEvents.set(1);
+  }
+  
+  void tickerRun() {
+    while(1)
+    {
+      tickerEvents.wait_any(1);
+      update();
+    }
   }
 };
 

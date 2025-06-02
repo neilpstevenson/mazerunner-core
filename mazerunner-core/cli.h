@@ -44,10 +44,10 @@ struct Args {
   int argc = 0;
   void print() const {
     for (int i = 0; i < argc; i++) {
-      Serial.print(argv[i]);
-      Serial.print(' ');
+      SerialPort.print(argv[i]);
+      SerialPort.print(' ');
     }
-    Serial.println();
+    SerialPort.println();
   }
 };
 
@@ -165,22 +165,22 @@ class CommandLineInterface {
    */
   const char BACKSPACE = 0x08;
   bool read_serial() {
-    while (Serial.available()) {
-      char c = Serial.read();
+    while (SerialPort.available()) {
+      char c = SerialPort.read();
       if (c == '\r') {
-        Serial.println();
+        SerialPort.println();
         return true;
       } else if (c == BACKSPACE) {
         if (m_index > 0) {
           m_index--;
           m_buffer[m_index] = 0;
-          Serial.print(c);  // backspace only moves the cursor
-          Serial.print(' ');
-          Serial.print(c);
+          SerialPort.print(c);  // backspace only moves the cursor
+          SerialPort.print(' ');
+          SerialPort.print(c);
         }
       } else if (isPrintable(c)) {
         c = toupper(c);
-        Serial.print(c);
+        SerialPort.print(c);
         if (m_index < INPUT_BUFFER_SIZE - 1) {
           m_buffer[m_index++] = c;
           m_buffer[m_index] = 0;
@@ -303,7 +303,7 @@ class CommandLineInterface {
         help();
         break;
       case 'X':
-        Serial.println(F("Reset Maze"));
+        SerialPort.println(F("Reset Maze"));
         maze.initialise();
         break;
       case 'W':
@@ -316,9 +316,9 @@ class CommandLineInterface {
         reporter.print_maze(DIRS);
         break;
       case 'B':
-        Serial.print(F("Battery: "));
-        Serial.print(battery.voltage(), 2);
-        Serial.print(F(" Volts\n"));
+        SerialPort.print(F("Battery: "));
+        SerialPort.print(battery.voltage(), 2);
+        SerialPort.print(F(" Volts\n"));
         break;
       case 'S':
         sensors.enable();
@@ -367,10 +367,11 @@ class CommandLineInterface {
         mouse.follow_to(maze.goal());
       } break;
       case 4:
-        mouse.test_SS90E();
+        mouse.test_SS90E_Left();
         break;
       case 5:
-        mouse.wander_to(Location(20, 20));  // not implemented
+        mouse.test_SS90E_Right();
+        // mouse.test_SS90F(); // not implemented
         break;
       case 6:
         mouse.conf_edge_detection();
@@ -381,12 +382,12 @@ class CommandLineInterface {
       case 8:
         mouse.conf_log_front_sensor();
         break;
-
       case 9:
-        mouse.run(4 * FULL_CELL);
-        ;
+        mouse.test_forward(1000);
         break;
-
+      case 10:
+        mouse.test_log_position_sensors();
+        break;
       default:
         // just to be safe...
         sensors.disable();
@@ -402,9 +403,9 @@ class CommandLineInterface {
   }
 
   void prompt() {
-    Serial.println();
-    Serial.print('>');
-    Serial.print(' ');
+    SerialPort.println();
+    SerialPort.print('>');
+    SerialPort.print(' ');
   }
 
   /***
@@ -413,32 +414,32 @@ class CommandLineInterface {
    *
    */
   void help() {
-    Serial.println(F("?   : this text"));
-    Serial.println(F("X   : reset maze"));
-    Serial.println(F("W   : display maze walls"));
-    Serial.println(F("C   : display maze costs"));
-    Serial.println(F("D   : display maze with directions"));
-    Serial.println(F("B   : show battery voltage"));
-    Serial.println(F("S   : show sensor readings"));
-    Serial.println(F("F n : Run user function n"));
-    Serial.println(F("       0 = ---"));
-    Serial.println(F("       1 = Sensor Static Calibration"));
-    Serial.println(F("       2 = Search to the goal and back"));
-    Serial.println(F("       3 = Follow a wall to the goal"));
-    Serial.println(F("       4 = Test SS90E Turn"));
-    Serial.println(F("       5 = Wander"));
-    Serial.println(F("       6 = Test Edge Detect Position"));
-    Serial.println(F("       7 = Sensor Spin Calibration"));
-    Serial.println(F("       8 = Get Front Sensor table"));
-    Serial.println(F("       9 = move forward 4 cells"));
-    Serial.println(F("      10 = "));
-    Serial.println(F("      11 = "));
-    Serial.println(F("      12 = "));
-    Serial.println(F("      13 = "));
-    Serial.println(F("      14 = "));
-    Serial.println(F("      15 = "));
-    Serial.println(F("SEARCH x y : search to location (x,y)"));
-    Serial.println(F("HELP       : this text"));
+    SerialPort.println(F("?   : this text"));
+    SerialPort.println(F("X   : reset maze"));
+    SerialPort.println(F("W   : display maze walls"));
+    SerialPort.println(F("C   : display maze costs"));
+    SerialPort.println(F("D   : display maze with directions"));
+    SerialPort.println(F("B   : show battery voltage"));
+    SerialPort.println(F("S   : show sensor readings"));
+    SerialPort.println(F("F n : Run user function n"));
+    SerialPort.println(F("       0 = ---"));
+    SerialPort.println(F("       1 = Sensor Static Calibration"));
+    SerialPort.println(F("       2 = Search to the goal and back"));
+    SerialPort.println(F("       3 = Follow a wall to the goal"));
+    SerialPort.println(F("       4 = Test SS90E Turn"));
+    SerialPort.println(F("       5 = n/a Test SS90F Turn"));
+    SerialPort.println(F("       6 = Test Edge Detect Position"));
+    SerialPort.println(F("       7 = Sensor Spin Calibration"));
+    SerialPort.println(F("       8 = Log front sensors"));
+    SerialPort.println(F("       9 = Test 1000mm forward"));
+    SerialPort.println(F("      10 = Test encoder sensors"));
+    SerialPort.println(F("      11 = "));
+    SerialPort.println(F("      12 = "));
+    SerialPort.println(F("      13 = "));
+    SerialPort.println(F("      14 = "));
+    SerialPort.println(F("      15 = "));
+    SerialPort.println(F("SEARCH x y : search to location (x,y)"));
+    SerialPort.println(F("HELP       : this text"));
   }
 
  private:

@@ -282,6 +282,7 @@ class Motors {
   // TODO: HARDWARE DEPENDENCY
   enum { PWM_488_HZ, PWM_977_HZ, PWM_3906_HZ, PWM_31250_HZ };
   void set_pwm_frequency(int frequency = PWM_31250_HZ) {
+/*    
     switch (frequency) {
       case PWM_31250_HZ:
         // Divide by 1. frequency = 31.25 kHz;
@@ -300,6 +301,7 @@ class Motors {
         bitSet(TCCR1B, CS10);
         break;
     }
+*/    
   }
 
   /**
@@ -337,7 +339,7 @@ class Motors {
   }
 
  private:
-  bool m_controller_output_enabled = true;
+  bool m_controller_output_enabled = false;
   bool m_feedforward_enabled = true;
   float m_previous_fwd_error = 0;
   float m_previous_rot_error = 0;

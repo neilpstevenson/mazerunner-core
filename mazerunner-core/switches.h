@@ -49,7 +49,7 @@ class Switches {
   explicit Switches(uint8_t channel) : m_channel(channel){};
 
   void update() {
-    m_switches_adc = adc.get_dark(m_channel);
+    m_switches_adc = analogRead(SWITCHES_PIN); //adc.get_dark(m_channel);
   }
 
   /**
@@ -60,12 +60,14 @@ class Switches {
   int read() {
     update();
 
-    if (m_switches_adc > 800) {
+//    Serial.println(m_switches_adc);
+
+    if (m_switches_adc > adc_thesholds[0]) {
       return 16;
     }
     for (int i = 0; i < 16; i++) {
-      int low = pgm_read_word_near(adc_thesholds + i);
-      int high = pgm_read_word_near(adc_thesholds + i + 1);
+      int low = adc_thesholds[i];
+      int high = adc_thesholds[i + 1];
       if (m_switches_adc > (low + high) / 2) {
         return i;
       }

@@ -140,9 +140,9 @@ const int adc_thesholds[] PROGMEM = {660, 647, 630, 614, 590, 570, 545, 522, 461
 int serial_putchar(char c, FILE *f) {
   if (c == '\n') {
     // TODO do we need to add carriage returns? I think not.
-    Serial.write('\r');
+    SerialPort.write('\r');
   }
-  return Serial.write(c) == 1 ? 0 : 1;
+  return SerialPort.write(c) == 1 ? 0 : 1;
 }
 
 FILE serial_stdout;

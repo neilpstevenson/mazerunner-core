@@ -15,6 +15,7 @@
 #include <Arduino.h>
 #include <wiring_private.h>
 #include "config.h"
+#include <mbed.h>
 
 /***
  * The AnalogueConverter class samples a fixed number of ADC channels from 0 to
@@ -82,7 +83,7 @@ extern AnalogueConverter adc;
 class AnalogueConverter {
  public:
   enum {
-    MAX_CHANNELS = 8,
+    MAX_CHANNELS = 4,
   };
 
   void enable_emitters() {
@@ -120,15 +121,41 @@ class AnalogueConverter {
   };
 
   void converter_init() {
-    // Change the clock prescaler from 128 to 32 for a 500kHz clock
-    bitSet(ADCSRA, ADPS2);
-    bitClear(ADCSRA, ADPS1);
-    bitSet(ADCSRA, ADPS0);
+    // Set up the HAL objects
+    analogin_init(&m_halObject[0], p26);
+    analogin_init(&m_halObject[1], p27);
+    analogin_init(&m_halObject[2], p28);
+    analogin_init(&m_halObject[3], p29);
+//    // Change the clock prescaler from 128 to 32 for a 500kHz clock
+//    bitSet(ADCSRA, ADPS2);
+//    bitClear(ADCSRA, ADPS1);
+//    bitSet(ADCSRA, ADPS0);
     // Set the reference to AVcc and right adjust the result
-    ADMUX = DEFAULT << 6;
+//    ADMUX = DEFAULT << 6;
   }
 
   void start_conversion_cycle() {
+    // Dark
+    for(int m_channel = 0; m_channel < MAX_CHANNELS; m_channel++)
+       m_adc_dark[m_channel] = analogin_read_u16(&m_halObject[m_channel]) >> 4;
+    // Lit - sides
+    if (m_emitters_enabled) {
+      digitalWrite(emitter_diagonal(), 1);
+    }
+    wait_ns(adcSettlingDelayNs);
+    m_adc_lit[0] = analogin_read_u16(&m_halObject[0]) >> 4;
+    m_adc_lit[3] = analogin_read_u16(&m_halObject[3]) >> 4;
+    digitalWrite(emitter_diagonal(), 0);
+    // Lit - front
+    if (m_emitters_enabled) {
+      digitalWrite(emitter_front(), 1);
+    }
+    wait_ns(adcSettlingDelayNs);
+    m_adc_lit[1] = analogin_read_u16(&m_halObject[1]) >> 4;
+    m_adc_lit[2] = analogin_read_u16(&m_halObject[2]) >> 4;
+    // Emitters off
+    digitalWrite(emitter_front(), 0);
+/*
     if (not m_configured) {
       return;
     }
@@ -137,8 +164,9 @@ class AnalogueConverter {
     m_channel = 0;
     bitSet(ADCSRA, ADIE);         // enable the ADC interrupt
     start_conversion(m_channel);  // begin a conversion to get things started
+*/    
   }
-
+/*
   void end_conversion_cycle() {
     bitClear(ADCSRA, ADIE);  // disable the ADC interrupt
   }
@@ -151,7 +179,7 @@ class AnalogueConverter {
   int get_adc_result() {
     return ADC;
   }
-
+*/
   int get_lit(const int i) const {
     return m_adc_lit[i];
   }
@@ -167,7 +195,7 @@ class AnalogueConverter {
     }
     return diff;
   }
-
+/*
   /// Perform a 'manual' conversion of a channel
   /// should not be used if the interrupt-driven sequencer is on
   int do_conversion(uint8_t channel) {
@@ -225,10 +253,12 @@ class AnalogueConverter {
         break;
     }
   }
+*/
 
  private:
-  volatile int m_adc_dark[MAX_CHANNELS] = {0, 0, 0, 0, 0, 0, 0, 0};
-  volatile int m_adc_lit[MAX_CHANNELS]{0, 0, 0, 0, 0, 0, 0, 0};
+  analogin_t m_halObject[MAX_CHANNELS];
+  volatile int m_adc_dark[MAX_CHANNELS];
+  volatile int m_adc_lit[MAX_CHANNELS];
   uint8_t m_emitter_front_pin = -1;
   uint8_t m_emitter_diagonal_pin = -1;
   uint8_t m_index = 0;
