@@ -339,7 +339,7 @@ class Motors {
   }
 
  private:
-  bool m_controller_output_enabled = false;
+  bool m_controller_output_enabled;
   bool m_feedforward_enabled = true;
   float m_previous_fwd_error = 0;
   float m_previous_rot_error = 0;

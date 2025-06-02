@@ -64,13 +64,17 @@ struct TurnParameters {
 /// list the hardware platforms you can suport
 #define HARDWARE_UNKNOWN 0
 #define HARDWARE_UKMARSBOT_1_3A 1
+#define HARDWARE_HALF_MONTY_1 2
+#define HARDWARE_MONTY_PI 3
 
-/// define the choice for this build
-#define HARDWARE HARDWARE_UKMARSBOT_1_3A
+#define HARDWARE_TYPE HARDWARE_MONTY_PI
 
-/// include the relevant config file
-#if HARDWARE == HARDWARE_UKMARSBOT_1_3A
+#if HARDWARE_TYPE == HARDWARE_UKMARSBOT_1_3A
 #include "config-ukmarsbot.h"
+#elif HARDWARE_TYPE == HARDWARE_HALF_MONTY_1
+#include "config-half-monty.h"
+#elif HARDWARE_TYPE == HARDWARE_MONTY_PI
+#include "config-monty-pi.h"
 #else
 #error "NO HARDWARE DEFINED"
 #endif
@@ -89,6 +93,7 @@ struct TurnParameters {
 #define EVENT_APEC 4
 
 // choose the one you will be using BEFORE selecting the robot below
+//#define EVENT EVENT_UK
 #define EVENT EVENT_UK
 #if EVENT == EVENT_HOME
 #define GOAL Location(2, 2)
@@ -115,14 +120,18 @@ const float HALF_CELL = FULL_CELL / 2.0;
 #define ROBOT_NOT_DEFINED 0
 #define ROBOT_CORE_OSMIUM 1
 #define ROBOT_ORION 2
+#define ROBOT_HALF_MONTY 3
+#define ROBOT_MONTY_PI 4
 
 /// this is the variant you are building for.
-#define ROBOT ROBOT_CORE_OSMIUM
+#define ROBOT ROBOT_MONTY_PI
 
 #if ROBOT == ROBOT_CORE_OSMIUM
 #include "config-robot-osmium.h"
 #elif ROBOT == ROBOT_ORION
 #include "config-robot-orion.h"
+#elif ROBOT == ROBOT_MONTY_PI
+#include "config-robot-monty-pi.h"
 #else
 #error "NO ROBOT DEFINED"
 #endif
