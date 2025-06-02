@@ -259,12 +259,11 @@ class Sensors {
   // such as when starting the robot by putting your hand in front
 
   bool occluded_left() {
-    return lfs.raw > OCCLUDED_THRESHOLD_FRONT_RAW;//     && sensors.rfs.raw < OCCLUDED_THRESHOLD_FRONT_RAW;
+    return lfs.raw > OCCLUDED_THRESHOLD_FRONT_RAW && sensors.rfs.raw < OCCLUDED_THRESHOLD_FRONT_RAW;
   }
 
   bool occluded_right() {
-    return //lfs.raw < OCCLUDED_THRESHOLD_FRONT_RAW && 
-    sensors.rfs.raw > OCCLUDED_THRESHOLD_FRONT_RAW;
+    return lfs.raw < OCCLUDED_THRESHOLD_FRONT_RAW && sensors.rfs.raw > OCCLUDED_THRESHOLD_FRONT_RAW;
   }
 
   /**
@@ -281,7 +280,7 @@ class Sensors {
    */
   uint8_t wait_for_user_start() {
     int state = 0;
-    //indicators.showRedIndicator(1);
+    indicators.showRedIndicator(1);
     //digitalWrite(LED_USER, 1);
     enable();
     uint8_t choice = NO_START;
@@ -300,29 +299,26 @@ class Sensors {
       {
         digitalWrite(LED_LEFT_IO, 0);
       }
-      if(RFS_ADC_CHANNEL != LFS_ADC_CHANNEL)
-      {
-        count = 0;
-        while (occluded_right()) {
-          count++;
-          digitalWrite(LED_RIGHT_IO, 1);
-          delay(20);
-        }
-        if (count > 5) {
-          choice = RIGHT_START;
-          break;
-        }
-        else
-        {
-          digitalWrite(LED_RIGHT_IO, 0);
-        }
+      count = 0;
+      while (occluded_right()) {
+        count++;
+        digitalWrite(LED_RIGHT_IO, 1);
+        delay(20);
       }
-      //indicators.showRedIndicator(state);
+      if (count > 5) {
+        choice = RIGHT_START;
+        break;
+      }
+      else
+      {
+        digitalWrite(LED_RIGHT_IO, 0);
+      }
+      indicators.showRedIndicator(state);
       state = 1 - state;
       delay(35);
     }
     disable();
-    //indicators.showRedIndicator(0);
+    indicators.showRedIndicator(0);
     digitalWrite(LED_LEFT_IO, 0);
     digitalWrite(LED_RIGHT_IO, 0);
     //digitalWrite(LED_USER, 0);

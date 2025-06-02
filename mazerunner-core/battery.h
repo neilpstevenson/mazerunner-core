@@ -36,17 +36,18 @@ class Battery {
   explicit Battery(uint8_t channel) : m_adc_channel(channel){};
 
   void update() {
-    m_adc_value = adc.get_dark(m_adc_channel);
-    m_battery_volts = BATTERY_MULTIPLIER * m_adc_value;
+    // Half Monty has no battery ADC
+    //m_adc_value = adc.get_dark(m_adc_channel);
+    m_battery_volts = 7; //BATTERY_MULTIPLIER * m_adc_value;
   }
 
   float voltage() {
-    return m_battery_volts;
+    return 7; //m_battery_volts;
   }
 
  private:
   Battery();  // no instantiation without an adc channel
-  int m_adc_value = 0;
+  int m_adc_value;
   int m_adc_channel;
-  float m_battery_volts = 0;
+  float m_battery_volts;
 };

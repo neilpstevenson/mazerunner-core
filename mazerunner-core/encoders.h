@@ -50,8 +50,8 @@ void callback_right_encoder_isr();
 class Encoders {
  public:
   void begin() {
-    encoder_r.begin(pull_direction::up, resolution::half);
-    encoder_l.begin(pull_direction::up, resolution::half);
+    encoder_r.begin(pull_direction::up, resolution::full);
+    encoder_l.begin(pull_direction::up, resolution::full);
 //    pinMode(ENCODER_LEFT_CLK, INPUT);
 //    pinMode(ENCODER_LEFT_B, INPUT);
 //    pinMode(ENCODER_RIGHT_CLK, INPUT);
@@ -118,13 +118,11 @@ class Encoders {
     int right_delta = 0;
     ATOMIC {
       // Make sure values don't change while being read. Be quick.
-      left_delta = ENCODER_LEFT_POLARITY * encoder_l.reset_count();
-      right_delta = ENCODER_RIGHT_POLARITY * encoder_r.reset_count();
+      left_delta = encoder_l.reset_count();
+      right_delta = encoder_r.reset_count();
       //m_left_counter = 0;
       //m_right_counter = 0;
     }
-
-//      Serial.println(left_delta);
     float left_change = left_delta * MM_PER_COUNT_LEFT;
     float right_change = right_delta * MM_PER_COUNT_RIGHT;
     m_fwd_change = 0.5 * (right_change + left_change);

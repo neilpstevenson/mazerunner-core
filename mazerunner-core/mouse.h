@@ -347,7 +347,7 @@ class Mouse {
     sensors.set_steering_mode(STEERING_OFF);
     digitalWrite(LED_LEFT_IO, 0);
     digitalWrite(LED_RIGHT_IO, 0);
-    //indicators.blink(4, 0, 16, 0); // Green
+    indicators.blink(4, 0, 16, 0); // Green
   }
 
   /***
@@ -495,7 +495,7 @@ class Mouse {
     sensors.set_steering_mode(STEERING_OFF);
     digitalWrite(LED_LEFT_IO, 0);
     digitalWrite(LED_RIGHT_IO, 0);
-    //indicators.blink(4, 0, 16, 0); // Green
+    indicators.blink(4, 0, 16, 0); // Green
 }
 
   /****************************************************************************/
@@ -740,16 +740,7 @@ class Mouse {
    * Visual feedback by flashing the LED indicators
    */
   void blink(int count) {
-    for (int i = 0; i < count; i++) {
-      digitalWrite(LED_LEFT, 1);
-      digitalWrite(LED_RIGHT, 1);
-      digitalWrite(LED_BUILTIN, 1);
-      delay(100);
-      digitalWrite(LED_LEFT, 0);
-      digitalWrite(LED_RIGHT, 0);
-      digitalWrite(LED_BUILTIN, 0);
-      delay(100);
-    }
+    indicators.blink(count, 8, 0, 0); // Red
   }
 
   /***
@@ -760,7 +751,8 @@ class Mouse {
       blink(1);
     }
     switches.wait_for_button_release();
-    digitalWrite(LED_BUILTIN, 0);
+    indicators.showRedIndicator(0);
+    //digitalWrite(LED_BUILTIN, 0);
   }
 
   /***
@@ -929,7 +921,7 @@ void test_log_position_sensors() {
    * NOTE: that the left and right turns are likely to be different.
    *
    */
-  void test_SS90E_Left() {
+  void test_SS90E() {
     // note that changes to the speeds are likely to affect
     // the other turn parameters
     uint8_t side = sensors.wait_for_user_start();
@@ -940,11 +932,11 @@ void test_log_position_sensors() {
     motion.move(distance, SEARCH_TURN_SPEED, SEARCH_TURN_SPEED, SEARCH_ACCELERATION);
     motion.set_position(FULL_CELL);
 
-//    if (side == RIGHT_START) {
-//      turn_smooth(SS90ER);
-//    } else {
+    if (side == RIGHT_START) {
+      turn_smooth(SS90ER);
+    } else {
       turn_smooth(SS90EL);
-//    }
+    }
     // after the turn, estimate the angle error by looking for
     // changes in the side sensor readings
     int sensor_left = sensors.lss.value;

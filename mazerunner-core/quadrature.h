@@ -108,34 +108,34 @@ template<int A_pin, int B_pin>
 void Quadrature_encoder<A_pin, B_pin>::begin(pull_direction pull_dir, resolution res)
 {
     // configure the pins
-//    gpio_init(A_pin);
-//    gpio_init(B_pin);
-    gpio_set_dir(A_pin, GPIO_IN);
-    gpio_set_dir(B_pin, GPIO_IN);
+ /*   gpio_init(A_pin);
+    gpio_init(B_pin);
+    mbed::gpio_set_dir(A_pin, GPIO_IN);
+    mbed::gpio_set_dir(B_pin, GPIO_IN);
     switch (pull_dir)
     {
     case pull_direction::up:
-        gpio_pull_up(A_pin);
-        gpio_pull_up(B_pin);
+        mbed::gpio_pull_up(A_pin);
+        mbed::gpio_pull_up(B_pin);
         break;
     case pull_direction::down:
-        gpio_pull_down(A_pin);
-        gpio_pull_down(B_pin);
+        mbed::gpio_pull_down(A_pin);
+        mbed::gpio_pull_down(B_pin);
         break;
     case pull_direction::none:
-        gpio_disable_pulls(A_pin);
-        gpio_disable_pulls(B_pin);
+        mbed::gpio_disable_pulls(A_pin);
+        mbed::gpio_disable_pulls(B_pin);
         break;
     }
-
+*/
     // configure the interrupts according to resolution parameter
     switch (res)
     {
     case resolution::quarter:
-        irq_handler.register_interrupt(B_pin, cgpio_irq_handler::irq_event::rise, Quadrature_encoder<A_pin, B_pin>::on_A_change);
+        irq_handler.register_interrupt(A_pin, cgpio_irq_handler::irq_event::fall, Quadrature_encoder<A_pin, B_pin>::on_A_change);
         break;
     case resolution::half:
-        irq_handler.register_interrupt(B_pin, cgpio_irq_handler::irq_event::change, Quadrature_encoder<A_pin, B_pin>::on_A_change);
+        irq_handler.register_interrupt(A_pin, cgpio_irq_handler::irq_event::change, Quadrature_encoder<A_pin, B_pin>::on_A_change);
         break;
     case resolution::full:
         irq_handler.register_interrupt(A_pin, cgpio_irq_handler::irq_event::change, Quadrature_encoder<A_pin, B_pin>::on_A_change);
@@ -162,13 +162,9 @@ void Quadrature_encoder<A_pin, B_pin>::on_A_change(uint gpio, uint32_t events)
     last_transition_interval = us_time - last_transition_time;
     last_transition_time = us_time;
     
-    // Clock is XOR of A & B in UKMARSBOT 
-    uint a = gpio_get(A_pin); 
-    uint b = gpio_get(B_pin) ^ a;
-
     if (events == GPIO_IRQ_EDGE_RISE)
     {
-        if (b)
+        if (gpio_get(B_pin))
         {
             --cnt;
             direction = -1;
@@ -181,7 +177,7 @@ void Quadrature_encoder<A_pin, B_pin>::on_A_change(uint gpio, uint32_t events)
     }
     else
     {
-        if (b)
+        if (gpio_get(B_pin))
         {
             ++cnt;
             direction = 1;

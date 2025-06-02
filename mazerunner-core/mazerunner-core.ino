@@ -11,7 +11,7 @@
 
 #include <Arduino.h>
 #include "config.h"
-//#include "indicators.h"
+#include "indicators.h"
 #include "adc.h"
 #include "battery.h"
 #include "cli.h"
@@ -32,7 +32,7 @@
 Systick systick;                          // the main system control loop
 AnalogueConverter adc;                    // controls all analogue conversions
 Battery battery(BATTERY_ADC_CHANNEL);     // monitors battery voltage
-Switches switches(SWITCHES_ADC_CHANNEL);  // monitors the button and switches
+Switches switches;                        // monitors the button and switches
 Encoders encoders;                        // tracks the wheel encoder counts
 Sensors sensors;                          // make sensor alues from adc vdata
 Motion motion;                            // high level motion operations
@@ -41,9 +41,9 @@ Profile forward;                          // speed profiles for forward motion
 Profile rotation;                         // speed profiles for rotary motion
 Maze maze PERSISTENT;                     // holds maze map (even after a reset)
 Mouse mouse;                              // all the main robot logic is here
-CommandLineInterface cli;                 // user interaction on the serial port
+CommandLineInterface cli;                 // user interaction on the SerialPort port
 Reporter reporter;                        // formatted reporting of robot state
-//Indicators indicators;                    // More complex indicators/display
+Indicators indicators;                    // More complex indicators/display
 
 /******************************************************************************/
 
@@ -76,15 +76,14 @@ void setup() {
   digitalWrite(LED_LEFT_IO, 0);
   pinMode(LED_RIGHT_IO, OUTPUT);
   digitalWrite(LED_RIGHT_IO, 0);
-  //pinMode(SWITCH_GO_PIN, INPUT_PULLUP);
-  //pinMode(SWITCH_SELECT_PIN, INPUT_PULLUP);
+  pinMode(SWITCH_GO_PIN, INPUT_PULLUP);
+  pinMode(SWITCH_SELECT_PIN, INPUT_PULLUP);
   adc.begin();
   motors.begin();
   encoders.begin();
   /// do not begin systick until the hardware is setup
   systick.begin();
   /// keep the button held down after a reset to clear the maze
-  /// otherwise you will use the last-saved map.
   if (switches.button_pressed()) {
     maze.initialise();
     mouse.blink(2);
@@ -94,9 +93,9 @@ void setup() {
   else
   {
     // Quick flash to signal all ok
-    //indicators.blink(1, 0, 16, 0);
+    indicators.blink(1, 0, 16, 0);
   }
-  //switches.show_select_state();
+  switches.show_select_state();
   /// leave the emitters off unless we are actually using the sensors
   /// less power, less risk
   sensors.disable();
@@ -112,20 +111,11 @@ void setup() {
 /// the main loop exists only to initiate tasks either as a result
 /// of pressing the button or sending a command through the SerialPort port
 void loop() {
-  /*
-  while(1)
-  {
-    Serial.print(encoder_l.count());
-    Serial.print(" ");
-    Serial.println(encoder_r.count());
-    delay(20);
-  }
-  */
   if (switches.button_pressed()) {
     switches.wait_for_button_release();
     int function = switches.read();
     cli.run_function(function);
-    //switches.show_select_state();
+    switches.show_select_state();
   } else if (cli.read_serial()) {
     cli.interpret_line();
   } else {

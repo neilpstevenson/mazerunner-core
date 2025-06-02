@@ -44,12 +44,15 @@
 class Switches;
 // so that we can declare the instance
 extern Switches switches;
+
+const int MAX_SWITCH_VALUE = 10;
+
 class Switches {
  public:
-  explicit Switches(uint8_t channel) : m_channel(channel){};
 
   void update() {
-    m_switches_adc = analogRead(SWITCHES_PIN); //adc.get_dark(m_channel);
+    //m_switches_adc = adc.get_dark(m_channel);
+    update_select_button();
   }
 
   /**
@@ -59,24 +62,64 @@ class Switches {
    */
   int read() {
     update();
-
-//    Serial.println(m_switches_adc);
-
-    if (m_switches_adc > adc_thesholds[0]) {
-      return 16;
-    }
-    for (int i = 0; i < 16; i++) {
-      int low = adc_thesholds[i];
-      int high = adc_thesholds[i + 1];
-      if (m_switches_adc > (low + high) / 2) {
-        return i;
-      }
-    }
-    return -1;
+    return m_switches;
   }
 
   inline bool button_pressed() {
-    return read() == 16;
+    return !digitalRead(SWITCH_GO_PIN);
+  }
+
+/*
+  Simulate the switches using the "select" button to cycle around the options
+*/
+  void update_select_button() {
+    static int debounce = 0;
+    static bool last_button_state = false;
+
+    if(!last_button_state)
+    {
+      // Button was not pressed previously 
+      if(!digitalRead(SWITCH_SELECT_PIN))
+      {
+        // Button down for a while
+        if(++debounce == 10 )
+        {
+          // Cycle switch state
+          m_switches = m_switches >= MAX_SWITCH_VALUE ? 0 : m_switches+1;
+          show_select_state();
+          last_button_state = true;
+          debounce = 0;
+        }
+      }
+      else
+      {
+        // Bouncing transition
+        debounce = 0;
+      }
+    }
+    else
+    {
+      // Button was pressed previously 
+      if(digitalRead(SWITCH_SELECT_PIN))
+      {
+        // Button up for a while
+        if(++debounce == 20 )
+        {
+          last_button_state = false;
+          debounce = 0;
+        }
+      }
+      else
+      {
+        // Bouncing transition
+        debounce = 0;
+      }
+    }
+  }
+
+  void show_select_state()
+  {
+    indicators.showMenuIndex(m_switches);
   }
 
   void wait_for_button_press() {
@@ -100,12 +143,11 @@ class Switches {
   // for testing
   int adc_reading() {
     update();
-    return m_switches_adc;
+    return m_switches;
   }
 
  private:
-  uint8_t m_channel = 255;
-  int m_switches_adc = 0;
+  int m_switches = 0;
 };
 
 #endif

@@ -64,13 +64,16 @@ struct TurnParameters {
 /// list the hardware platforms you can suport
 #define HARDWARE_UNKNOWN 0
 #define HARDWARE_UKMARSBOT_1_3A 1
+#define HARDWARE_MONTY_TWINS 2
 
 /// define the choice for this build
-#define HARDWARE HARDWARE_UKMARSBOT_1_3A
+#define HARDWARE_TYPE HARDWARE_MONTY_TWINS
 
 /// include the relevant config file
-#if HARDWARE == HARDWARE_UKMARSBOT_1_3A
+#if HARDWARE_TYPE == HARDWARE_UKMARSBOT_1_3A
 #include "config-ukmarsbot.h"
+#elif HARDWARE_TYPE == HARDWARE_MONTY_TWINS
+#include "config-montytwins.h"
 #else
 #error "NO HARDWARE DEFINED"
 #endif
@@ -90,13 +93,14 @@ struct TurnParameters {
 
 // choose the one you will be using BEFORE selecting the robot below
 #define EVENT EVENT_UK
+//#define EVENT EVENT_HOME
 #if EVENT == EVENT_HOME
 #define GOAL Location(2, 2)
 #else
 #define GOAL Location(7, 7)
 #endif
 // This is the size, in mm,  for each cell in the maze.
-const float FULL_CELL = 180.0f;
+const float FULL_CELL = 90.0f;
 const float HALF_CELL = FULL_CELL / 2.0;
 
 /*************************************************************************/
@@ -115,14 +119,17 @@ const float HALF_CELL = FULL_CELL / 2.0;
 #define ROBOT_NOT_DEFINED 0
 #define ROBOT_CORE_OSMIUM 1
 #define ROBOT_ORION 2
+#define ROBOT_MONTY_TWINS 3
 
 /// this is the variant you are building for.
-#define ROBOT ROBOT_CORE_OSMIUM
+#define ROBOT ROBOT_MONTY_TWINS
 
 #if ROBOT == ROBOT_CORE_OSMIUM
 #include "config-robot-osmium.h"
 #elif ROBOT == ROBOT_ORION
 #include "config-robot-orion.h"
+#elif ROBOT == ROBOT_MONTY_TWINS
+#include "config-robot-montytwins.h"
 #else
 #error "NO ROBOT DEFINED"
 #endif
