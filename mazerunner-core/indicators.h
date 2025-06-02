@@ -1,5 +1,4 @@
 #pragma once
-/* NOT SUPPORTED
 #include <Adafruit_NeoPixel.h>
 
 class Indicators;
@@ -40,7 +39,7 @@ class Indicators
 
     /***
     * Visual feedback by flashing the LED indicators
-    *
+    */
     void blink(int count, int r, int g, int b) 
     {
       for (int i = 0; i < count; i++) {
@@ -60,4 +59,3 @@ class Indicators
   private:
     Adafruit_NeoPixel pixels;
 };
-*/

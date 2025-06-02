@@ -367,10 +367,9 @@ class CommandLineInterface {
         mouse.follow_to(maze.goal());
       } break;
       case 4:
-        mouse.test_SS90E_Left();
+        mouse.test_SS90E();
         break;
       case 5:
-        mouse.test_SS90E_Right();
         // mouse.test_SS90F(); // not implemented
         break;
       case 6:

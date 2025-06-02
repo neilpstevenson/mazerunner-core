@@ -67,14 +67,14 @@ class Motors {
   }
 
   void begin() {
-    pinMode(MOTOR_LEFT_DIR, OUTPUT);
-    pinMode(MOTOR_RIGHT_DIR, OUTPUT);
-    pinMode(MOTOR_LEFT_PWM, OUTPUT);
-    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
-    digitalWrite(MOTOR_LEFT_PWM, 0);
-    digitalWrite(MOTOR_LEFT_DIR, 0);
-    digitalWrite(MOTOR_RIGHT_PWM, 0);
-    digitalWrite(MOTOR_RIGHT_DIR, 0);
+    pinMode(MOTOR_LEFT_A, OUTPUT);
+    pinMode(MOTOR_RIGHT_A, OUTPUT);
+    pinMode(MOTOR_LEFT_B, OUTPUT);
+    pinMode(MOTOR_RIGHT_B, OUTPUT);
+    digitalWrite(MOTOR_LEFT_A, 0);
+    digitalWrite(MOTOR_RIGHT_A, 0);
+    digitalWrite(MOTOR_LEFT_B, 0);
+    digitalWrite(MOTOR_RIGHT_B, 0);
     set_pwm_frequency();
     stop();
   }
@@ -142,15 +142,15 @@ class Motors {
    */
 
   float leftFeedForward(float speed) {
-    static float oldSpeed = speed;
+    static float oldSpeed = 0;
     float leftFF = speed * SPEED_FF;
-    if (speed > 0) {
-      leftFF += BIAS_FF;
-    } else if (speed < 0) {
-      leftFF -= BIAS_FF;
-    } else {
-      // No bias when the speed is 0
-    }
+	if (speed > 0) {
+		leftFF += BIAS_FF ;
+	} else if (speed < 0){
+		leftFF -= BIAS_FF ;
+	} else {
+		// No bias when the speed is 0
+	}
     float acc = (speed - oldSpeed) * LOOP_FREQUENCY;
     oldSpeed = speed;
     float accFF = ACC_FF * acc;
@@ -159,15 +159,15 @@ class Motors {
   }
 
   float rightFeedForward(float speed) {
-    static float oldSpeed = speed;
+    static float oldSpeed = 0;
     float rightFF = speed * SPEED_FF;
-    if (speed > 0) {
-      rightFF += BIAS_FF;
-    } else if (speed < 0) {
-      rightFF -= BIAS_FF;
-    } else {
-      // No bias when the speed is 0
-    }
+	if (speed > 0) {
+		rightFF += BIAS_FF ;
+	} else if (speed < 0){
+		rightFF -= BIAS_FF ;
+	} else {
+		// No bias when the speed is 0
+	}
     float acc = (speed - oldSpeed) * LOOP_FREQUENCY;
     oldSpeed = speed;
     float accFF = ACC_FF * acc;
@@ -249,22 +249,30 @@ class Motors {
   void set_left_motor_pwm(int pwm) {
     pwm = MOTOR_LEFT_POLARITY * constrain(pwm, -MOTOR_MAX_PWM, MOTOR_MAX_PWM);
     if (pwm < 0) {
-      fast_write_pin(MOTOR_LEFT_DIR, 1);
-      analogWrite(MOTOR_LEFT_PWM, -pwm);
+      analogWrite(MOTOR_LEFT_A, 255+pwm);
+      analogWrite(MOTOR_LEFT_B, 255);
+      //fast_write_pin(MOTOR_LEFT_DIR, 1);
+      //analogWrite(MOTOR_LEFT_PWM, -pwm);
     } else {
-      fast_write_pin(MOTOR_LEFT_DIR, 0);
-      analogWrite(MOTOR_LEFT_PWM, pwm);
+      analogWrite(MOTOR_LEFT_A, 255);  // 0 = coast mode, 255 = break-mode
+      analogWrite(MOTOR_LEFT_B, 255-pwm);
+      //fast_write_pin(MOTOR_LEFT_DIR, 0);
+      //analogWrite(MOTOR_LEFT_PWM, pwm);
     }
   }
   // TODO: HARDWARE DEPENDENCY
   void set_right_motor_pwm(int pwm) {
     pwm = MOTOR_RIGHT_POLARITY * constrain(pwm, -MOTOR_MAX_PWM, MOTOR_MAX_PWM);
     if (pwm < 0) {
-      fast_write_pin(MOTOR_RIGHT_DIR, 1);
-      analogWrite(MOTOR_RIGHT_PWM, -pwm);
+      analogWrite(MOTOR_RIGHT_A, 255+pwm);
+      analogWrite(MOTOR_RIGHT_B, 255);
+      //fast_write_pin(MOTOR_RIGHT_DIR, 1);
+      //analogWrite(MOTOR_RIGHT_PWM, -pwm);
     } else {
-      fast_write_pin(MOTOR_RIGHT_DIR, 0);
-      analogWrite(MOTOR_RIGHT_PWM, pwm);
+      analogWrite(MOTOR_RIGHT_A, 255);  // 0 = coast mode, 255 = break-mode
+      analogWrite(MOTOR_RIGHT_B, 255-pwm);
+      //fast_write_pin(MOTOR_RIGHT_DIR, 0);
+      //analogWrite(MOTOR_RIGHT_PWM, pwm);
     }
   }
 

@@ -135,6 +135,7 @@ class AnalogueConverter {
   }
 
   void start_conversion_cycle() {
+    static const int adcSettlingDelayNs = 100000;
     // Dark
     for(int m_channel = 0; m_channel < MAX_CHANNELS; m_channel++)
        m_adc_dark[m_channel] = analogin_read_u16(&m_halObject[m_channel]) >> 4;
