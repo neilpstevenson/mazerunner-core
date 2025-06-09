@@ -34,16 +34,14 @@ class Indicators
     }
 
     /***
-    * Visual feedback by flashing the mezzanine LED indicators
+    * Visual feedback by flashing the mezzanine and sensor LED indicators
     */
     void blink(int count, int r, int g, int b) 
     {
       for (int i = 0; i < count; i++) {
-        digitalWrite(LED_LEFT_MEZ, 1);
-        digitalWrite(LED_RIGHT_MEZ, 1);
+        showColourIndex(0x1f);
         delay(100);
-        digitalWrite(LED_LEFT_MEZ, 0);
-        digitalWrite(LED_RIGHT_MEZ, 0);
+        showColourIndex(0);
         delay(100);
       }
   }

@@ -82,7 +82,7 @@ class Switches {
       if(!digitalRead(SWITCH_SELECT_PIN))
       {
         // Button down for a while
-        if(++debounce == 10 )
+        if(++debounce == 5 )
         {
           // Cycle switch state
           m_switches = m_switches >= MAX_SWITCH_VALUE ? 0 : m_switches+1;
@@ -103,7 +103,7 @@ class Switches {
       if(digitalRead(SWITCH_SELECT_PIN))
       {
         // Button up for a while
-        if(++debounce == 20 )
+        if(++debounce == 10 )
         {
           last_button_state = false;
           debounce = 0;

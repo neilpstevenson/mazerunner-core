@@ -15,19 +15,19 @@
 // hardware configuration for UKMARS Gemini-based MONTY TWINS with a Raspberry Pi Pico board
 
 //**** IO CONFIGURATION ****************************************************//
-const uint8_t ENCODER_LEFT_CLK = 8;
-const uint8_t ENCODER_RIGHT_CLK = 7;
-const uint8_t ENCODER_LEFT_B = 9;
-const uint8_t ENCODER_RIGHT_B = 6;
+const uint8_t ENCODER_LEFT_CLK = 9;
+const uint8_t ENCODER_RIGHT_CLK = 6;
+const uint8_t ENCODER_LEFT_B = 8;
+const uint8_t ENCODER_RIGHT_B = 7;
 const uint8_t LED_LEFT_IO = 20;   // Green
 const uint8_t LED_RIGHT_IO = 18;  // Red
 const uint8_t LED_MID_IO = 19;    // Blue
 const uint8_t LED_LEFT_MEZ = 10;  // Orange
 const uint8_t LED_RIGHT_MEZ = 11; // White
 const uint8_t MOTOR_LEFT_A = 2;
-const uint8_t MOTOR_RIGHT_A = 3;
-const uint8_t MOTOR_LEFT_B = 4;
-const uint8_t MOTOR_RIGHT_B = 5;
+const uint8_t MOTOR_RIGHT_A = 5;
+const uint8_t MOTOR_LEFT_B = 3;
+const uint8_t MOTOR_RIGHT_B = 4;
 const uint8_t EMITTER_A = 21; // Forward
 const uint8_t EMITTER_B = 22; // Sides
 

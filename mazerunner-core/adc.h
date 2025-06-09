@@ -145,7 +145,7 @@ class AnalogueConverter {
     }
     wait_ns(adcSettlingDelayNs);
     m_adc_lit[0] = analogin_read_u16(&m_halObject[0]) >> 4;
-    m_adc_lit[3] = analogin_read_u16(&m_halObject[3]) >> 4;
+    m_adc_lit[2] = analogin_read_u16(&m_halObject[2]) >> 4;
     digitalWrite(emitter_diagonal(), 0);
     // Lit - front
     if (m_emitters_enabled) {
@@ -153,7 +153,7 @@ class AnalogueConverter {
     }
     wait_ns(adcSettlingDelayNs);
     m_adc_lit[1] = analogin_read_u16(&m_halObject[1]) >> 4;
-    m_adc_lit[2] = analogin_read_u16(&m_halObject[2]) >> 4;
+    m_adc_lit[3] = analogin_read_u16(&m_halObject[3]) >> 4;
     // Emitters off
     digitalWrite(emitter_front(), 0);
 /*

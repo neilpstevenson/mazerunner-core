@@ -99,10 +99,15 @@ class Motors {
    */
   float position_controller() {
     float increment = m_velocity * LOOP_INTERVAL;
-    m_fwd_error += increment - encoders.robot_fwd_change();
+    float change = encoders.robot_fwd_change();
+    m_fwd_error += increment - change;
     float diff = m_fwd_error - m_previous_fwd_error;
     m_previous_fwd_error = m_fwd_error;
     float output = FWD_KP * m_fwd_error + FWD_KD * diff;
+    //if (m_controller_output_enabled) {
+      //Serial.print("increment = "); Serial.print(increment); Serial.print(", change = "); Serial.print(change); Serial.print(", m_fwd_error = "); Serial.print(m_fwd_error);  Serial.print(", diff = "); Serial.print(diff); Serial.print(", output = ");  Serial.println(output);  
+    //  Serial.println(output);  
+    //}
     return output;
   }
 

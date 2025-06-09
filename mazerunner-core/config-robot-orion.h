@@ -271,7 +271,7 @@ const float ROT_TM = 0.210;  // rotation time constant
  *
  *
  */
-const float MAX_MOTOR_VOLTS = 6.0;
+const float MAX_MOTOR_VOLTS = 7.0;
 
 const float SPEED_FF = (1.0 / FWD_KM);
 const float ACC_FF = (FWD_TM / FWD_KM);

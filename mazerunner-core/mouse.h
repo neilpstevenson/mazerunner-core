@@ -985,6 +985,46 @@ void test_SS90E_Right() {
     sensors.set_steering_mode(STEERING_OFF);
   }
 
+/*
+  Test turns by making a zig-zag move: 
+    Ahead
+    Right
+    Ahead
+    Left
+    Ahead
+    Stop
+*/
+  void test_turn_right_left() {
+    // note that changes to the speeds are likely to affect
+    // the other turn parameters
+    uint8_t side = sensors.wait_for_user_start();
+    sensors.enable();
+    motion.reset_drive_system();
+    sensors.set_steering_mode(STEERING_OFF);
+    // move to the boundary with the next cell
+    float distance = BACK_WALL_TO_CENTER;
+
+    SerialPort.println("Accelerating");
+
+    motion.move(distance, SEARCH_TURN_SPEED, SEARCH_TURN_SPEED, SEARCH_ACCELERATION);
+    motion.set_position(HALF_CELL);
+
+    SerialPort.println("Turning right");
+    turn_right();
+    SerialPort.println("Ahead");
+    move_ahead();
+    SerialPort.println("Turning left");
+    turn_left();
+    SerialPort.println("Ahead");
+    move_ahead();
+    SerialPort.println("Stopping");
+
+    motion.reset_drive_system();
+    motion.disable_drive();
+    sensors.set_steering_mode(STEERING_OFF);
+    sensors.disable();
+  }
+
   /***
    * A basic function to let you test the configuration of forward moves.
    *

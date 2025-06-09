@@ -92,15 +92,15 @@ struct TurnParameters {
 #define EVENT_APEC 4
 
 // choose the one you will be using BEFORE selecting the robot below
-#define EVENT EVENT_UK
-//#define EVENT EVENT_HOME
+//#define EVENT EVENT_UK
+#define EVENT EVENT_HOME
 #if EVENT == EVENT_HOME
 #define GOAL Location(2, 2)
 #else
 #define GOAL Location(7, 7)
 #endif
 // This is the size, in mm,  for each cell in the maze.
-const float FULL_CELL = 90.0f;
+const float FULL_CELL = 180.0f;
 const float HALF_CELL = FULL_CELL / 2.0;
 
 /*************************************************************************/

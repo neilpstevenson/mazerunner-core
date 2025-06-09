@@ -370,6 +370,7 @@ class CommandLineInterface {
         mouse.test_SS90E();
         break;
       case 5:
+        mouse.test_turn_right_left();
         // mouse.test_SS90F(); // not implemented
         break;
       case 6:
@@ -426,7 +427,7 @@ class CommandLineInterface {
     SerialPort.println(F("       2 = Search to the goal and back"));
     SerialPort.println(F("       3 = Follow a wall to the goal"));
     SerialPort.println(F("       4 = Test SS90E Turn"));
-    SerialPort.println(F("       5 = n/a Test SS90F Turn"));
+    SerialPort.println(F("       5 = Test Right-Left Turns"));
     SerialPort.println(F("       6 = Test Edge Detect Position"));
     SerialPort.println(F("       7 = Sensor Spin Calibration"));
     SerialPort.println(F("       8 = Log front sensors"));
