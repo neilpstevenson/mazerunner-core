@@ -95,7 +95,7 @@ struct TurnParameters {
 //#define EVENT EVENT_UK
 #define EVENT EVENT_HOME
 #if EVENT == EVENT_HOME
-#define GOAL Location(2, 2)
+#define GOAL Location(4, 4)
 #else
 #define GOAL Location(7, 7)
 #endif

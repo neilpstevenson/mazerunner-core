@@ -229,6 +229,19 @@ class Mouse {
 
   //***************************************************************************//
   void turn_left() {
+    turn_smooth(SS90EL);
+    m_heading = left_from(m_heading);
+  }
+
+  //***************************************************************************//
+  void turn_right() {
+    turn_smooth(SS90ER);
+    m_heading = right_from(m_heading);
+  }
+
+
+//***************************************************************************//
+  void turn_left_ip() {
     stop_at_center();
     sensors.set_steering_mode(STEERING_OFF);
     motion.set_target_velocity(0);
@@ -241,8 +254,8 @@ class Mouse {
     m_heading = left_from(m_heading);
   }
 
-  //***************************************************************************//
-  void turn_right() {
+//***************************************************************************//
+  void turn_right_ip() {
     stop_at_center();
     sensors.set_steering_mode(STEERING_OFF);
     motion.set_target_velocity(0);
@@ -269,8 +282,18 @@ class Mouse {
   void turn_back() {
     reporter.log_action_status('B', ' ', m_location, m_heading);
     stop_at_center();
-    turn_IP180();
-    float distance = SENSING_POSITION - HALF_CELL;
+    sensors.set_steering_mode(STEERING_OFF);
+    turn_IP90L();
+    // Back into wall and re-centre
+    motion.move(-(BACK_WALL_TO_CENTER+10), SEARCH_SPEED / 4, 0, SEARCH_ACCELERATION / 2);
+    motors.reset_controllers();
+    motion.move(BACK_WALL_TO_CENTER, SEARCH_SPEED / 4, 0, SEARCH_ACCELERATION / 2);
+    turn_IP90L();
+    // Back into wall
+    motion.move(-(BACK_WALL_TO_CENTER+10), SEARCH_SPEED / 4, 0, SEARCH_ACCELERATION / 2);
+    motors.reset_controllers();
+    sensors.set_steering_mode(STEER_NORMAL);
+    float distance = SENSING_POSITION - BACK_WALL_TO_CENTER;
     motion.move(distance, SEARCH_SPEED, SEARCH_SPEED, SEARCH_ACCELERATION);
     motion.set_position(SENSING_POSITION);
     m_heading = behind_from(m_heading);
@@ -463,21 +486,25 @@ class Mouse {
           // next loop iteration
           case AHEAD:
             digitalWrite(LED_LEFT_IO, 0);
+            digitalWrite(LED_MID_IO, 1);
             digitalWrite(LED_RIGHT_IO, 0);
             move_ahead();
             break;
           case RIGHT:
             digitalWrite(LED_LEFT_IO, 0);
+            digitalWrite(LED_MID_IO, 0);
             digitalWrite(LED_RIGHT_IO, 1);
             turn_right();
             break;
           case BACK:
             digitalWrite(LED_LEFT_IO, 1);
+            digitalWrite(LED_MID_IO, 1);
             digitalWrite(LED_RIGHT_IO, 1);
             turn_back();
             break;
           case LEFT:
             digitalWrite(LED_LEFT_IO, 1);
+            digitalWrite(LED_MID_IO, 0);
             digitalWrite(LED_RIGHT_IO, 0);
             turn_left();
             break;
@@ -725,6 +752,7 @@ class Mouse {
     m_handStart = false;  // Assumes central in a cell
     search_to(START);
     turn_to_face(NORTH);
+    motion.move(-(BACK_WALL_TO_CENTER+10), SEARCH_SPEED / 4, 0, SEARCH_ACCELERATION / 2);
     motion.stop();
     motion.disable_drive();
     return 0;
