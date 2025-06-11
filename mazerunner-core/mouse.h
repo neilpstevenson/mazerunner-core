@@ -149,7 +149,6 @@ class Mouse {
    *
    */
   void turn_smooth(int turn_id) {
-    sensors.set_steering_mode(STEERING_OFF);
     motion.set_target_velocity(SEARCH_TURN_SPEED);
     TurnParameters params = turn_params[turn_id];
 
@@ -176,9 +175,11 @@ class Mouse {
     char dir = (turn_id & 1) ? 'R' : 'L';
     reporter.log_action_status(dir, note, m_location, m_heading);  // the sensors triggered the turn
     // finally we get to actually turn
+    sensors.set_steering_mode(STEERING_OFF);
     motion.turn(params.angle, params.omega, 0, params.alpha);
     // robot should be at output offset - run to the sensing position
     int end_point = HALF_CELL + params.exit_offset;
+    sensors.set_steering_mode(STEER_NORMAL);
     motion.move(SENSING_POSITION - end_point, motion.velocity(), SEARCH_SPEED, SEARCH_ACCELERATION);
     motion.set_position(SENSING_POSITION);
   }
@@ -266,11 +267,31 @@ class Mouse {
    *
    * It only takes 27mm of travel to come to a halt from normal search speed.
    */
-  void turn_back() {
+  void turn_back_ip() {
     reporter.log_action_status('B', ' ', m_location, m_heading);
     stop_at_center();
     turn_IP180();
     float distance = SENSING_POSITION - HALF_CELL;
+    motion.move(distance, SEARCH_SPEED, SEARCH_SPEED, SEARCH_ACCELERATION);
+    motion.set_position(SENSING_POSITION);
+    m_heading = behind_from(m_heading);
+  }
+
+  void turn_back() {
+    reporter.log_action_status('B', ' ', m_location, m_heading);
+    stop_at_center();
+    sensors.set_steering_mode(STEERING_OFF);
+    turn_IP90L();
+    // Back into wall and re-centre
+    motion.move(-(BACK_WALL_TO_CENTER+10), SEARCH_SPEED / 4, 0, SEARCH_ACCELERATION / 2);
+    motors.reset_controllers();
+    motion.move(BACK_WALL_TO_CENTER, SEARCH_SPEED / 4, 0, SEARCH_ACCELERATION / 2);
+    turn_IP90L();
+    // Back into wall
+    motion.move(-(BACK_WALL_TO_CENTER+10), SEARCH_SPEED / 4, 0, SEARCH_ACCELERATION / 2);
+    motors.reset_controllers();
+    sensors.set_steering_mode(STEER_NORMAL);
+    float distance = SENSING_POSITION - BACK_WALL_TO_CENTER;
     motion.move(distance, SEARCH_SPEED, SEARCH_SPEED, SEARCH_ACCELERATION);
     motion.set_position(SENSING_POSITION);
     m_heading = behind_from(m_heading);
@@ -725,6 +746,7 @@ class Mouse {
     m_handStart = false;  // Assumes central in a cell
     search_to(START);
     turn_to_face(NORTH);
+    motion.move(-(BACK_WALL_TO_CENTER+10), SEARCH_SPEED / 4, 0, SEARCH_ACCELERATION / 2);
     motion.stop();
     motion.disable_drive();
     return 0;
