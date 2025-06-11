@@ -149,7 +149,6 @@ class Mouse {
    *
    */
   void turn_smooth(int turn_id) {
-    sensors.set_steering_mode(STEERING_OFF);
     motion.set_target_velocity(SEARCH_TURN_SPEED);
     TurnParameters params = turn_params[turn_id];
 
@@ -176,9 +175,11 @@ class Mouse {
     char dir = (turn_id & 1) ? 'R' : 'L';
     reporter.log_action_status(dir, note, m_location, m_heading);  // the sensors triggered the turn
     // finally we get to actually turn
+    sensors.set_steering_mode(STEERING_OFF);
     motion.turn(params.angle, params.omega, 0, params.alpha);
     // robot should be at output offset - run to the sensing position
     int end_point = HALF_CELL + params.exit_offset;
+    sensors.set_steering_mode(STEER_NORMAL);
     motion.move(SENSING_POSITION - end_point, motion.velocity(), SEARCH_SPEED, SEARCH_ACCELERATION);
     motion.set_position(SENSING_POSITION);
   }

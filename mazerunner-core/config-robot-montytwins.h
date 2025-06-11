@@ -74,8 +74,8 @@ const int FRONT_REFERENCE = 700; //200;  // sum reading when mouse centered with
 // it changes a bit if there is an adjacent wall. The threshold is set for
 // when the robot is 20mm past the cell boundary. That is, the distance
 // from the front of the mouse to the wall ahead is 92mm (half=50mm)
-const int TURN_THRESHOLD_SS90E = 115;
-const int EXTRA_WALL_ADJUST = 5;
+const int TURN_THRESHOLD_SS90E = 118;
+const int EXTRA_WALL_ADJUST = 0;  //5; // separate sensors, not needed on Gemini
 
 // Threshold used for starting the robot runs
 const int OCCLUDED_THRESHOLD_FRONT_RAW = 1000;
@@ -101,8 +101,8 @@ const int FRONT_REFERENCE = 700; //200;  // sum reading when mouse centered with
 // it changes a bit if there is an adjacent wall. The threshold is set for
 // when the robot is 20mm past the cell boundary. That is, the distance
 // from the front of the mouse to the wall ahead is 92mm (half=50mm)
-const int TURN_THRESHOLD_SS90E = 115;
-const int EXTRA_WALL_ADJUST = 5;
+const int TURN_THRESHOLD_SS90E = 118;
+const int EXTRA_WALL_ADJUST = 0;  //5; // separate sensors, not needed on Gemini
 
 // Threshold used for starting the robot runs
 const int OCCLUDED_THRESHOLD_FRONT_RAW = 1000;
@@ -181,7 +181,7 @@ const float WHEEL_DIAMETER = 31.73;
 // small amount. AFTER you have the wheel diameter and gear ratio calibrated,
 // have the mouse turn in place and adjust the MOUSE_RADIUS until these turns are
 // as accurate as you can get them
-const float MOUSE_RADIUS = 40.2; //39.5; // Adjust on test - bigger for motr turn
+const float MOUSE_RADIUS = 40.2; //39.5; // Adjust on test - bigger for more turn
 
 // The robot is likely to have wheels of different diameters or motors of slightly
 // different characteristics and that must be compensated for if the robot is to
@@ -270,7 +270,7 @@ const float STEERING_ADJUST_LIMIT = 10.0;  // deg/s
 //***** PERFORMANCE CONSTANTS************************************************//
 // search and run speeds in mm/s and mm
 const int SEARCH_SPEED = 400;
-const int SEARCH_ACCELERATION = 2000;
+const int SEARCH_ACCELERATION = 1800; //2000;
 const int SEARCH_TURN_SPEED = 300;
 const int SMOOTH_TURN_SPEED = 500;
 const int FAST_TURN_SPEED = 600;
@@ -302,7 +302,7 @@ const float RIGHT_SCALE = (float)SIDE_NOMINAL / RIGHT_CALIBRATION;
 // the values above which, a wall is seen
 const int LEFT_THRESHOLD = 40; //60;   // minimum value to register a wall
 const int RIGHT_THRESHOLD = 40; //60;  // minimum value to register a wall
-const int FRONT_THRESHOLD = 35; //48; //60;  // minimum value to register a wall
+const int FRONT_THRESHOLD = 25; //35; //48; //60;  // minimum value to register a wall
 
 // the distance through the cell at which the corresponding sensor
 // will see a falling edge
@@ -316,10 +316,10 @@ const float SENSING_POSITION = 170.0;  // HALF_CELL + 40mm, i.e. around 65mm bef
 // These take no storage - the compiler uses the values directly
 const TurnParameters turn_params[4] = {
     //           speed, entry,   exit, angle, omega,  alpha, sensor threshold
-    {SEARCH_TURN_SPEED,    70,     80,  90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
-    {SEARCH_TURN_SPEED,    70,     80, -90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
-    {SEARCH_TURN_SPEED,    70,     80,  90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
-    {SEARCH_TURN_SPEED,    70,     80, -90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
+    {SEARCH_TURN_SPEED,    70,     70,  90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
+    {SEARCH_TURN_SPEED,    70,     70, -90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
+    {SEARCH_TURN_SPEED,    70,     70,  90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
+    {SEARCH_TURN_SPEED,    70,     70, -90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
 };
 // clang-format on
 
