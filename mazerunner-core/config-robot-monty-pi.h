@@ -69,14 +69,14 @@ const int RIGHT_CALIBRATION = 1000; //890;
 // sensors.get_distance(sensor,k) return 68mm (half=30mm) when the mouse is backed up
 // against a wall with only a wall ahead and sensor is the calibrated sum of the front sensors
 const int FRONT_LINEAR_CONSTANT = 961; //i.e = sqrt(sum(FL,FR)) * 68 = sqrt(200) * 68
-const int FRONT_REFERENCE = 530;  // sum reading when mouse centered with wall ahead
+const int FRONT_REFERENCE = 500;  // sum reading when mouse centered with wall ahead
 
 // SS90E turn thresholds. This is the front sum reading to trigger a turn
 // it changes a bit if there is an adjacent wall. The threshold is set for
 // when the robot is 20mm past the cell boundary. That is, the distance
 // from the front of the mouse to the wall ahead is 92mm (half=50mm)
-const int TURN_THRESHOLD_SS90E = 124;
-const int EXTRA_WALL_ADJUST = 5;
+const int TURN_THRESHOLD_SS90E = 108; //124;
+const int EXTRA_WALL_ADJUST = 10;
 
 // Threshold used for starting the robot runs
 const int OCCLUDED_THRESHOLD_FRONT_RAW = 900;
@@ -85,25 +85,25 @@ const int OCCLUDED_THRESHOLD_FRONT_RAW = 900;
 // wall sensor thresholds and constants
 // RAW values for the front sensor when the robot is backed up to a wall
 // with another wall ahead
-const int FRONT_LEFT_CALIBRATION = 1210;
+const int FRONT_LEFT_CALIBRATION = 1210; //790;
 const int FRONT_RIGHT_CALIBRATION = FRONT_LEFT_CALIBRATION;  // Same sensor
 // RAW values for the side sensors when the robot is centered in a cell
 // and there is no wall ahead
-const int LEFT_CALIBRATION = 1120;
-const int RIGHT_CALIBRATION = 1000;
+const int LEFT_CALIBRATION = 1120; //870;
+const int RIGHT_CALIBRATION = 1000; //890;
 
 // The front linear constant is the value of k needed to make the function
-// sensors.get_distance(sensor,k) return 68mm (15mm) when the mouse is backed up
-// against a wall with only a wall ahead
+// sensors.get_distance(sensor,k) return 68mm (half=30mm) when the mouse is backed up
+// against a wall with only a wall ahead and sensor is the calibrated sum of the front sensors
 const int FRONT_LINEAR_CONSTANT = 961; //i.e = sqrt(sum(FL,FR)) * 68 = sqrt(200) * 68
-const int FRONT_REFERENCE = 500;  // reading when mouse centered with wall ahead
+const int FRONT_REFERENCE = 500;  // sum reading when mouse centered with wall ahead
 
 // SS90E turn thresholds. This is the front sum reading to trigger a turn
 // it changes a bit if there is an adjacent wall. The threshold is set for
 // when the robot is 20mm past the cell boundary. That is, the distance
-// from the front of the mouse to the wall ahead is 92mm
-const int TURN_THRESHOLD_SS90E = 124;
-const int EXTRA_WALL_ADJUST = 5;
+// from the front of the mouse to the wall ahead is 92mm (half=50mm)
+const int TURN_THRESHOLD_SS90E = 108; //124;
+const int EXTRA_WALL_ADJUST = 10;
 
 // Threshold used for starting the robot runs
 const int OCCLUDED_THRESHOLD_FRONT_RAW = 900;
@@ -182,14 +182,14 @@ const float WHEEL_DIAMETER = 31.25;
 // small amount. AFTER you have the wheel diameter and gear ratio calibrated,
 // have the mouse turn in place and adjust the MOUSE_RADIUS until these turns are
 // as accurate as you can get them
-const float MOUSE_RADIUS = 40.4; // Adjust on test
+const float MOUSE_RADIUS = 40.4; // Adjust on test - bigger for more turn
 
 // The robot is likely to have wheels of different diameters or motors of slightly
 // different characteristics and that must be compensated for if the robot is to
 // reliably drive in a straight line.
 // This number adjusts the encoder count and must be  added to the right
 // and subtracted from the left motor.
-const float ROTATION_BIAS = -0.006; // Negative makes robot curve to left
+const float ROTATION_BIAS = -0.003; // Negative makes robot curve to left
 
 // Now we can pre-calculate the key constats for the motion control
 const float MM_PER_COUNT = PI * WHEEL_DIAMETER / (ENCODER_PULSES * GEAR_RATIO);
@@ -207,9 +207,9 @@ const float LOOP_INTERVAL = (1.0 / LOOP_FREQUENCY);
 // Dynamic performance constants
 // There is a video describing how to get these numbers and calculate the feedforward
 // constnats here: https://youtu.be/BrabDeHGsa0
-const float FWD_KM = 475.0;  // mm/s/Volt
+const float FWD_KM = 1200; //475.0;  // mm/s/Volt
 const float FWD_TM = 0.190;  // forward time constant
-const float ROT_KM = 775.0;  // deg/s/Volt
+const float ROT_KM = 1500; //775.0;  // deg/s/Volt
 const float ROT_TM = 0.210;  // rotation time constant
 
 // Motor Feedforward
@@ -229,7 +229,7 @@ const float ROT_TM = 0.210;  // rotation time constant
  * That minimum voltage is the BIAS_FF. It is not dependent upon speed but is expressed
  * here as a fraction for comparison.
  */
-const float MAX_MOTOR_VOLTS = 6.0;
+const float MAX_MOTOR_VOLTS = 7.0;
 
 const float SPEED_FF = (1.0 / FWD_KM);
 const float ACC_FF = (FWD_TM / FWD_KM);
@@ -253,7 +253,7 @@ const float ROT_KP = 16 * ROT_TM / (ROT_KM * ROT_ZETA * ROT_ZETA * ROT_TD * ROT_
 const float ROT_KD = LOOP_FREQUENCY * (8 * ROT_TM - ROT_TD) / (ROT_KM * ROT_TD);
 
 // controller constants for the steering controller
-const float STEERING_KP = 0.005; //0.05; //0.25;
+const float STEERING_KP = 0.001; //0.005; //0.05; //0.25;
 const float STEERING_KD = 0.00;
 const float STEERING_ADJUST_LIMIT = 10.0;  // deg/s
 
@@ -301,9 +301,9 @@ const float LEFT_SCALE = (float)SIDE_NOMINAL / LEFT_CALIBRATION;
 const float RIGHT_SCALE = (float)SIDE_NOMINAL / RIGHT_CALIBRATION;
 
 // the values above which, a wall is seen
-const int LEFT_THRESHOLD =  50;  // minimum value to register a wall
-const int RIGHT_THRESHOLD = 50;  // minimum value to register a wall
-const int FRONT_THRESHOLD = 50;  // minimum value to register a wall
+const int LEFT_THRESHOLD =  40;  // minimum value to register a wall
+const int RIGHT_THRESHOLD = 40;  // minimum value to register a wall
+const int FRONT_THRESHOLD = 35;  // minimum value to register a wall
 
 // the distance through the cell at which the corresponding sensor
 // will see a falling edge
@@ -317,10 +317,10 @@ const float SENSING_POSITION = 170.0;  // HALF_CELL + 40mm, i.e. around 65mm bef
 // These take no storage - the compiler uses the values directly
 const TurnParameters turn_params[4] = {
     //           speed, entry,   exit, angle, omega,  alpha, sensor threshold
-    {SEARCH_TURN_SPEED,    70,     80,  90.0, 287.0, 2866.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
-    {SEARCH_TURN_SPEED,    70,     80, -90.0, 287.0, 2866.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
-    {SEARCH_TURN_SPEED,    70,     80,  90.0, 287.0, 2866.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
-    {SEARCH_TURN_SPEED,    70,     80, -90.0, 287.0, 2866.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
+    {SEARCH_TURN_SPEED,    70,     70,  90.0, 287.0, 2866.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
+    {SEARCH_TURN_SPEED,    70,     70, -90.0, 287.0, 2866.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
+    {SEARCH_TURN_SPEED,    70,     70,  90.0, 287.0, 2866.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
+    {SEARCH_TURN_SPEED,    70,     70, -90.0, 287.0, 2866.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
 };
 // clang-format on
 

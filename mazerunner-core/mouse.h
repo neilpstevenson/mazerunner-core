@@ -149,7 +149,6 @@ class Mouse {
    *
    */
   void turn_smooth(int turn_id) {
-    sensors.set_steering_mode(STEERING_OFF);
     motion.set_target_velocity(SEARCH_TURN_SPEED);
     TurnParameters params = turn_params[turn_id];
 
@@ -176,9 +175,11 @@ class Mouse {
     char dir = (turn_id & 1) ? 'R' : 'L';
     reporter.log_action_status(dir, note, m_location, m_heading);  // the sensors triggered the turn
     // finally we get to actually turn
+    sensors.set_steering_mode(STEERING_OFF);
     motion.turn(params.angle, params.omega, 0, params.alpha);
     // robot should be at output offset - run to the sensing position
     int end_point = HALF_CELL + params.exit_offset;
+    sensors.set_steering_mode(STEER_NORMAL);
     motion.move(SENSING_POSITION - end_point, motion.velocity(), SEARCH_SPEED, SEARCH_ACCELERATION);
     motion.set_position(SENSING_POSITION);
   }
@@ -229,6 +230,19 @@ class Mouse {
 
   //***************************************************************************//
   void turn_left() {
+    turn_smooth(SS90EL);
+    m_heading = left_from(m_heading);
+  }
+
+  //***************************************************************************//
+  void turn_right() {
+    turn_smooth(SS90ER);
+    m_heading = right_from(m_heading);
+  }
+
+
+//***************************************************************************//
+  void turn_left_ip() {
     stop_at_center();
     sensors.set_steering_mode(STEERING_OFF);
     motion.set_target_velocity(0);
@@ -241,8 +255,8 @@ class Mouse {
     m_heading = left_from(m_heading);
   }
 
-  //***************************************************************************//
-  void turn_right() {
+//***************************************************************************//
+  void turn_right_ip() {
     stop_at_center();
     sensors.set_steering_mode(STEERING_OFF);
     motion.set_target_velocity(0);
@@ -269,8 +283,31 @@ class Mouse {
   void turn_back() {
     reporter.log_action_status('B', ' ', m_location, m_heading);
     stop_at_center();
-    turn_IP180();
-    float distance = SENSING_POSITION - HALF_CELL;
+    sensors.set_steering_mode(STEERING_OFF);
+//   static int back_turn_count = 0;
+//    if(++back_turn_count & 1)
+//    {
+      turn_IP90L();
+      // Back into wall and re-centre
+      motion.move(-(BACK_WALL_TO_CENTER+10), SEARCH_SPEED / 4, 0, SEARCH_ACCELERATION / 2);
+      motors.reset_controllers();
+      motion.move(BACK_WALL_TO_CENTER, SEARCH_SPEED / 4, 0, SEARCH_ACCELERATION / 2);
+      turn_IP90L();
+//    }
+//    else
+    // {
+    //   turn_IP90R();
+    //   // Back into wall and re-centre
+    //   motion.move(-(BACK_WALL_TO_CENTER+10), SEARCH_SPEED / 4, 0, SEARCH_ACCELERATION / 2);
+    //   motors.reset_controllers();
+    //   motion.move(BACK_WALL_TO_CENTER, SEARCH_SPEED / 4, 0, SEARCH_ACCELERATION / 2);
+    //   turn_IP90R();
+    // }
+    // Back into wall
+    motion.move(-(BACK_WALL_TO_CENTER+10), SEARCH_SPEED / 4, 0, SEARCH_ACCELERATION / 2);
+    motors.reset_controllers();
+    sensors.set_steering_mode(STEER_NORMAL);
+    float distance = SENSING_POSITION - BACK_WALL_TO_CENTER;
     motion.move(distance, SEARCH_SPEED, SEARCH_SPEED, SEARCH_ACCELERATION);
     motion.set_position(SENSING_POSITION);
     m_heading = behind_from(m_heading);
@@ -725,6 +762,7 @@ class Mouse {
     m_handStart = false;  // Assumes central in a cell
     search_to(START);
     turn_to_face(NORTH);
+    motion.move(-(BACK_WALL_TO_CENTER+10), SEARCH_SPEED / 4, 0, SEARCH_ACCELERATION / 2);
     motion.stop();
     motion.disable_drive();
     return 0;
@@ -991,6 +1029,46 @@ void test_SS90E_Right() {
     motion.reset_drive_system();
     motion.disable_drive();
     sensors.set_steering_mode(STEERING_OFF);
+  }
+
+/*
+  Test turns by making a zig-zag move: 
+    Ahead
+    Right
+    Ahead
+    Left
+    Ahead
+    Stop
+*/
+  void test_turn_right_left() {
+    // note that changes to the speeds are likely to affect
+    // the other turn parameters
+    uint8_t side = sensors.wait_for_user_start();
+    sensors.enable();
+    motion.reset_drive_system();
+    sensors.set_steering_mode(STEERING_OFF);
+    // move to the boundary with the next cell
+    float distance = BACK_WALL_TO_CENTER;
+
+    SerialPort.println("Accelerating");
+
+    motion.move(distance, SEARCH_TURN_SPEED, SEARCH_TURN_SPEED, SEARCH_ACCELERATION);
+    motion.set_position(HALF_CELL);
+
+    SerialPort.println("Turning right");
+    turn_right();
+    SerialPort.println("Ahead");
+    move_ahead();
+    SerialPort.println("Turning left");
+    turn_left();
+    SerialPort.println("Ahead");
+    move_ahead();
+    SerialPort.println("Stopping");
+
+    motion.reset_drive_system();
+    motion.disable_drive();
+    sensors.set_steering_mode(STEERING_OFF);
+    sensors.disable();
   }
 
   /***
