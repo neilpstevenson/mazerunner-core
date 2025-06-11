@@ -479,19 +479,19 @@ class Mouse {
       update_map();
       maze.flood(target);
       unsigned char newHeading = maze.heading_to_smallest(m_location, m_heading);
-      if(newHeading == BLOCKED)
-      {
-        motion.stop();
-        sensors.set_steering_mode(STEERING_OFF);
-        sensors.disable();
-        motion.disable_drive();
-        SerialPort.println();
-        SerialPort.println(F("NO ROUTE TO TARGET!"));
-        panic();
-        return;
-      }
       unsigned char hdgChange = (newHeading - m_heading) & 0x3;
       if (m_location != target) {
+        if(newHeading == BLOCKED)
+        {
+          motion.stop();
+          sensors.set_steering_mode(STEERING_OFF);
+          sensors.disable();
+          motion.disable_drive();
+          SerialPort.println();
+          SerialPort.println(F("NO ROUTE TO TARGET!"));
+          panic();
+          return;
+        }
         switch (hdgChange) {
           // each of the following actions will finish with the
           // robot moving and at the sensing point ready for the
