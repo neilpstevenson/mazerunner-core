@@ -336,23 +336,19 @@ class Mouse {
       char action = '#';
       if (m_location != target) {
         if (!sensors.see_left_wall) {
-          digitalWrite(LED_LEFT_IO, 1);
-          digitalWrite(LED_RIGHT_IO, 0);
+          indicators.indicateLeftTurn();
           turn_left();
           action = 'L';
         } else if (!sensors.see_front_wall) {
-          digitalWrite(LED_LEFT_IO, 0);
-          digitalWrite(LED_RIGHT_IO, 0);
+          indicators.indicateForward();
           move_ahead();
           action = 'F';
         } else if (!sensors.see_right_wall) {
-          digitalWrite(LED_LEFT_IO, 0);
-          digitalWrite(LED_RIGHT_IO, 1);
+          indicators.indicateRightTurn();
           turn_right();
           action = 'R';
         } else {
-          digitalWrite(LED_LEFT_IO, 1);
-          digitalWrite(LED_RIGHT_IO, 1);
+          indicators.indicateAboutTurn();
           turn_back();
           action = 'B';
         }
@@ -369,8 +365,7 @@ class Mouse {
     motion.reset_drive_system();
     motion.disable_drive();
     sensors.set_steering_mode(STEERING_OFF);
-    digitalWrite(LED_LEFT_IO, 0);
-    digitalWrite(LED_RIGHT_IO, 0);
+    indicators.indicateTurnsOff();
     indicators.blink(4, 0, 16, 0); // Green
   }
 
@@ -497,27 +492,19 @@ class Mouse {
           // robot moving and at the sensing point ready for the
           // next loop iteration
           case AHEAD:
-            digitalWrite(LED_LEFT_IO, 0);
-            digitalWrite(LED_MID_IO, 1);
-            digitalWrite(LED_RIGHT_IO, 0);
+            indicators.indicateForward();
             move_ahead();
             break;
           case RIGHT:
-            digitalWrite(LED_LEFT_IO, 0);
-            digitalWrite(LED_MID_IO, 0);
-            digitalWrite(LED_RIGHT_IO, 1);
+            indicators.indicateRightTurn();
             turn_right();
             break;
           case BACK:
-            digitalWrite(LED_LEFT_IO, 1);
-            digitalWrite(LED_MID_IO, 1);
-            digitalWrite(LED_RIGHT_IO, 1);
+            indicators.indicateAboutTurn();
             turn_back();
             break;
           case LEFT:
-            digitalWrite(LED_LEFT_IO, 1);
-            digitalWrite(LED_MID_IO, 0);
-            digitalWrite(LED_RIGHT_IO, 0);
+            indicators.indicateLeftTurn();
             turn_left();
             break;
         }
@@ -532,8 +519,7 @@ class Mouse {
     delay(250);
     motion.reset_drive_system();
     sensors.set_steering_mode(STEERING_OFF);
-    digitalWrite(LED_LEFT_IO, 0);
-    digitalWrite(LED_RIGHT_IO, 0);
+    indicators.indicateTurnsOff();
     indicators.blink(4, 0, 16, 0); // Green
 }
 
@@ -791,7 +777,7 @@ class Mouse {
       blink(1);
     }
     switches.wait_for_button_release();
-    indicators.showRedIndicator(0);
+    indicators.showReadyIndicator(0);
     //digitalWrite(LED_BUILTIN, 0);
   }
 

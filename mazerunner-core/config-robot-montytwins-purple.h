@@ -12,17 +12,21 @@
 
 #include <Arduino.h>
 
+// Customised interfaces for this robot hardware
+#include "indicators.h"
+
 /*****************************************************************************
  *
- * HALF MONTY is a half-size mouse based on an Waveshare RP2040 Zero board
+ * GEMINI MONTY TWIN is a mouse built on the UKMARS Gemini platform using
+ * a Raspberry Pi Pico board
  *
- * It uses a wall sensor board with four emitter-detector pairs. Gearmotors
- * with 20:1 ratio gearboxes and encoder discs with 6 magnets in each.
+ * It uses a wall sensor board with three emitter-detector pairs. Gearmotors
+ * with 20:1 ratio gearboxes and encoder discs with 6 magnets in each (12ppr).
  *
  * The sensors consist of SFH4550 emitters and SFH309FA detectors.
  *
  *****************************************************************************/
-#define NAME "GEMINI MONTY TWINS"
+#define NAME "GEMINI MONTY TWIN PURPLE"
 
 //***** SENSOR CALIBRATION **************************************************//
 /**

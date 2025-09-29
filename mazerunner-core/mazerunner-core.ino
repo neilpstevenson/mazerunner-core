@@ -11,7 +11,6 @@
 
 #include <Arduino.h>
 #include "config.h"
-#include "indicators.h"
 #include "adc.h"
 #include "battery.h"
 #include "cli.h"
@@ -75,12 +74,11 @@ void setup() {
   SerialPort.begin(BAUDRATE);
 #endif
 
-  pinMode(LED_LEFT_IO, OUTPUT);
-  digitalWrite(LED_LEFT_IO, 0);
-  pinMode(LED_RIGHT_IO, OUTPUT);
-  digitalWrite(LED_RIGHT_IO, 0);
+  indicators.begin();
+
   pinMode(SWITCH_GO_PIN, INPUT_PULLUP);
   pinMode(SWITCH_SELECT_PIN, INPUT_PULLUP);
+  
   adc.begin();
   motors.begin();
   encoders.begin();

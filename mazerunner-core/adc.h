@@ -135,7 +135,6 @@ class AnalogueConverter {
   }
 
   void start_conversion_cycle() {
-    static const int adcSettlingDelayNs = 100000;
     // Dark
     for(int m_channel = 0; m_channel < MAX_CHANNELS; m_channel++)
        m_adc_dark[m_channel] = analogin_read_u16(&m_halObject[m_channel]) >> 4;
@@ -143,7 +142,7 @@ class AnalogueConverter {
     if (m_emitters_enabled) {
       digitalWrite(emitter_diagonal(), 1);
     }
-    wait_ns(adcSettlingDelayNs);
+    wait_ns(ILLUMINATION_TO_ADC_DELAY_NS);
     m_adc_lit[0] = analogin_read_u16(&m_halObject[0]) >> 4;
     m_adc_lit[2] = analogin_read_u16(&m_halObject[2]) >> 4;
     digitalWrite(emitter_diagonal(), 0);
@@ -151,7 +150,7 @@ class AnalogueConverter {
     if (m_emitters_enabled) {
       digitalWrite(emitter_front(), 1);
     }
-    wait_ns(adcSettlingDelayNs);
+    wait_ns(ILLUMINATION_TO_ADC_DELAY_NS);
     m_adc_lit[1] = analogin_read_u16(&m_halObject[1]) >> 4;
     m_adc_lit[3] = analogin_read_u16(&m_halObject[3]) >> 4;
     // Emitters off

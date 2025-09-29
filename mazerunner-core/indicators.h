@@ -10,11 +10,16 @@ class Indicators
 
     void begin()
     {
-    }
+      pinMode(LED_LEFT_IO, OUTPUT);
+      digitalWrite(LED_LEFT_IO, 0);
+      pinMode(LED_RIGHT_IO, OUTPUT);
+      digitalWrite(LED_RIGHT_IO, 0);
+   }
 
-    void showRedIndicator(bool on)
+    void showReadyIndicator(bool on)
     {
-       digitalWrite(LED_RIGHT_IO, on);
+      digitalWrite(LED_LEFT_MEZ, on);
+      digitalWrite(LED_RIGHT_MEZ, on);
     }
 
     // Simple 3-bit RGB colour
@@ -44,5 +49,40 @@ class Indicators
         showColourIndex(0);
         delay(100);
       }
-  }
+    }
+
+    /**
+    * Feedback on turn directions during maze runs & searches
+    */
+    void indicateLeftTurn()
+    {
+      digitalWrite(LED_LEFT_IO, 1);
+      digitalWrite(LED_MID_IO, 0);
+      digitalWrite(LED_RIGHT_IO, 0);
+    }
+    void indicateRightTurn()
+    {
+      digitalWrite(LED_LEFT_IO, 0);
+      digitalWrite(LED_MID_IO, 0);
+      digitalWrite(LED_RIGHT_IO, 1);
+    }
+    void indicateForward()
+    {
+      digitalWrite(LED_LEFT_IO, 0);
+      digitalWrite(LED_MID_IO, 1);
+      digitalWrite(LED_RIGHT_IO, 0);
+    }
+    void indicateAboutTurn()
+    {
+      digitalWrite(LED_LEFT_IO, 1);
+      digitalWrite(LED_MID_IO, 1);
+      digitalWrite(LED_RIGHT_IO, 1);
+    }
+    void indicateTurnsOff()
+    {
+      digitalWrite(LED_LEFT_IO, 0);
+      digitalWrite(LED_MID_IO, 0);
+      digitalWrite(LED_RIGHT_IO, 0);
+    }
+
 };
