@@ -137,16 +137,17 @@ class AnalogueConverter {
       digitalWrite(emitter_diagonal(), 1);
     }
     wait_ns(ILLUMINATION_TO_ADC_DELAY_NS);
-    m_adc_lit[0] = analogin_read_u16(&m_halObject[0]) >> 4;
-    m_adc_lit[2] = analogin_read_u16(&m_halObject[2]) >> 4;
+    m_adc_lit[RSS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[RSS_ADC_CHANNEL]) >> 4;
+    m_adc_lit[LSS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[LSS_ADC_CHANNEL]) >> 4;
     digitalWrite(emitter_diagonal(), 0);
     // Lit - front
     if (m_emitters_enabled) {
       digitalWrite(emitter_front(), 1);
     }
     wait_ns(ILLUMINATION_TO_ADC_DELAY_NS);
-    m_adc_lit[1] = analogin_read_u16(&m_halObject[1]) >> 4;
-    m_adc_lit[3] = analogin_read_u16(&m_halObject[3]) >> 4;
+    m_adc_lit[RFS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[RFS_ADC_CHANNEL]) >> 4;
+    if(RFS_ADC_CHANNEL != LFS_ADC_CHANNEL)
+      m_adc_lit[LFS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[LFS_ADC_CHANNEL]) >> 4;
     // Emitters off
     digitalWrite(emitter_front(), 0);
   }

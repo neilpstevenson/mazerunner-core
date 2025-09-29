@@ -26,8 +26,8 @@ const uint8_t MOTOR_LEFT_A = 7;
 const uint8_t MOTOR_LEFT_B = 6;
 const uint8_t MOTOR_RIGHT_A = 8;
 const uint8_t MOTOR_RIGHT_B = 9;
-const uint8_t EMITTER_A = 15; // Forward
-const uint8_t EMITTER_B = 14; // Sides
+const uint8_t EMITTER_A = 14; // Forward
+const uint8_t EMITTER_B = 15; // Sides
 
 // the sensor ADC channels in case we have no special use for a given channel
 //const uint8_t SENSOR_0 = A0;

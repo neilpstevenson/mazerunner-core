@@ -12,6 +12,9 @@
 
 #include <Arduino.h>
 
+// Customised interfaces for this robot hardware
+#include "indicators-rp2040zero.h"
+
 /*****************************************************************************
  *
  * MONTY MINI is a half-size mouse based on an Waveshare RP2040 Zero board
@@ -57,18 +60,18 @@ RAW values for the front sensor when the robot is backed up to a wall
 // wall sensor thresholds and constants
 // RAW values for the front sensor when the robot is backed up to a wall
 // with another wall ahead
-const int FRONT_LEFT_CALIBRATION = 1405;
-const int FRONT_RIGHT_CALIBRATION = 1970;
+const int FRONT_LEFT_CALIBRATION = 1486;
+const int FRONT_RIGHT_CALIBRATION = 1932;
 // RAW values for the side sensors when the robot is centered in a cell
 // and there is no wall ahead
-const int LEFT_CALIBRATION = 2415;
-const int RIGHT_CALIBRATION = 1830;
+const int LEFT_CALIBRATION = 2475;
+const int RIGHT_CALIBRATION = 1737;
 
 // The front linear constant is the value of k needed to make the function
 // sensors.get_distance(sensor,k) return 68mm (half=30mm) when the mouse is backed up
 // against a wall with only a wall ahead
 const int FRONT_LINEAR_CONSTANT = 420; //i.e = sqrt(sum(FL,FR)) * 68
-const int FRONT_REFERENCE = 390;  // sum reading when mouse centered with wall ahead
+const int FRONT_REFERENCE = 350;  // sum reading when mouse centered with wall ahead
 
 // SS90E turn thresholds. This is the front sum reading to trigger a turn
 // it changes a bit if there is an adjacent wall. The threshold is set for
@@ -256,7 +259,7 @@ const float STEERING_ADJUST_LIMIT = 10.0;  // deg/s
 
 //***** PERFORMANCE CONSTANTS************************************************//
 // search and run speeds in mm/s and mm
-const int SEARCH_SPEED = 600;
+const int SEARCH_SPEED = 400;
 const int SEARCH_ACCELERATION = 1800;
 const int SEARCH_TURN_SPEED = 300;
 const int SMOOTH_TURN_SPEED = 500;
@@ -287,9 +290,9 @@ const float LEFT_SCALE = (float)SIDE_NOMINAL / LEFT_CALIBRATION;
 const float RIGHT_SCALE = (float)SIDE_NOMINAL / RIGHT_CALIBRATION;
 
 // the values above which, a wall is seen
-const int LEFT_THRESHOLD = 45;   // minimum value to register a wall
-const int RIGHT_THRESHOLD = 45;  // minimum value to register a wall
-const int FRONT_THRESHOLD = 60;  // minimum value to register a wall
+const int LEFT_THRESHOLD = 55;   // minimum value to register a wall
+const int RIGHT_THRESHOLD = 55;  // minimum value to register a wall
+const int FRONT_THRESHOLD = 70;  // minimum value to register a wall
 
 // the distance through the cell at which the corresponding sensor
 // will see a falling edge

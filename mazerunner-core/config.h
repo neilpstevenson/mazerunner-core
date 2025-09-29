@@ -69,7 +69,7 @@ struct TurnParameters {
 #define HARDWARE_MONTY_MINI 4
 
 /// define the choice for this build
-#define HARDWARE_TYPE HARDWARE_MONTY_TWINS_PURPLE
+#define HARDWARE_TYPE HARDWARE_MONTY_MINI
 
 /// include the relevant config file
 #if HARDWARE_TYPE == HARDWARE_UKMARSBOT_1_3A
@@ -135,7 +135,7 @@ const float HALF_CELL = FULL_CELL / 2.0;
 #define ROBOT_MONTY_MINI 5
 
 /// this is the variant you are building for.
-#define ROBOT ROBOT_MONTY_TWINS_PURPLE
+#define ROBOT ROBOT_MONTY_MINI
 
 #if ROBOT == ROBOT_CORE_OSMIUM
 #include "config-robot-osmium.h"
