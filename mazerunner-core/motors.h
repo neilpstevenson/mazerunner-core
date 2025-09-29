@@ -40,8 +40,18 @@ class Motors;
 
 extern Motors motors;
 
+const float MOTOR_PWM_PERIOD = 1.0 / 20000; // 20kHz give a reasonable response
+
 class Motors {
  public:
+
+  Motors()  :
+      motorLeftA(PinName(MOTOR_LEFT_A)),
+      motorLeftB(PinName(MOTOR_LEFT_B)),
+      motorRightA(PinName(MOTOR_RIGHT_A)),
+      motorRightB(PinName(MOTOR_RIGHT_B))
+  {}
+
   /***
    * TODO: the constructor should really get at least the hardware pins
    * to do a safe setup.
@@ -67,15 +77,17 @@ class Motors {
   }
 
   void begin() {
-    pinMode(MOTOR_LEFT_A, OUTPUT);
-    pinMode(MOTOR_RIGHT_A, OUTPUT);
-    pinMode(MOTOR_LEFT_B, OUTPUT);
-    pinMode(MOTOR_RIGHT_B, OUTPUT);
-    digitalWrite(MOTOR_LEFT_A, 0);
-    digitalWrite(MOTOR_RIGHT_A, 0);
-    digitalWrite(MOTOR_LEFT_B, 0);
-    digitalWrite(MOTOR_RIGHT_B, 0);
-    set_pwm_frequency();
+    // Set PWM frequency
+    motorLeftA.period(MOTOR_PWM_PERIOD);
+    motorLeftB.period(MOTOR_PWM_PERIOD);
+    motorRightA.period(MOTOR_PWM_PERIOD);
+    motorRightB.period(MOTOR_PWM_PERIOD);
+    // Default to "brake" mode - both inputs high
+    motorLeftA.write(1);
+    motorLeftB.write(1);
+    motorRightA.write(1);
+    motorRightB.write(1);
+    // Stopped
     stop();
   }
 
@@ -250,71 +262,34 @@ class Motors {
    * NOTE: it might be wise to check the resolution of the
    * analogueWrite function in other targtes
    */
-  // TODO: HARDWARE DEPENDENCY
-  void set_left_motor_pwm(int pwm) {
-    pwm = MOTOR_LEFT_POLARITY * constrain(pwm, -MOTOR_MAX_PWM, MOTOR_MAX_PWM);
-    if (pwm < 0) {
-      analogWrite(MOTOR_LEFT_A, 255+pwm);
-      analogWrite(MOTOR_LEFT_B, 255);
-      //fast_write_pin(MOTOR_LEFT_DIR, 1);
-      //analogWrite(MOTOR_LEFT_PWM, -pwm);
-    } else {
-      analogWrite(MOTOR_LEFT_A, 255);  // 0 = coast mode, 255 = break-mode
-      analogWrite(MOTOR_LEFT_B, 255-pwm);
-      //fast_write_pin(MOTOR_LEFT_DIR, 0);
-      //analogWrite(MOTOR_LEFT_PWM, pwm);
-    }
-  }
-  // TODO: HARDWARE DEPENDENCY
-  void set_right_motor_pwm(int pwm) {
-    pwm = MOTOR_RIGHT_POLARITY * constrain(pwm, -MOTOR_MAX_PWM, MOTOR_MAX_PWM);
-    if (pwm < 0) {
-      analogWrite(MOTOR_RIGHT_A, 255+pwm);
-      analogWrite(MOTOR_RIGHT_B, 255);
-      //fast_write_pin(MOTOR_RIGHT_DIR, 1);
-      //analogWrite(MOTOR_RIGHT_PWM, -pwm);
-    } else {
-      analogWrite(MOTOR_RIGHT_A, 255);  // 0 = coast mode, 255 = break-mode
-      analogWrite(MOTOR_RIGHT_B, 255-pwm);
-      //fast_write_pin(MOTOR_RIGHT_DIR, 0);
-      //analogWrite(MOTOR_RIGHT_PWM, pwm);
+  void set_left_motor_pwm(int pwm) 
+  {
+    float fPwm = float(MOTOR_LEFT_POLARITY* constrain(pwm, -MOTOR_MAX_PWM, MOTOR_MAX_PWM)) / (MOTOR_MAX_PWM+1);
+    if (fPwm < 0) 
+    {
+      motorLeftA.write(1.0f+fPwm);
+      motorLeftB.write(1.0f);
+    } 
+    else 
+    {
+      motorLeftA.write(1.0f);
+      motorLeftB.write(1.0f-fPwm);
     }
   }
 
-  /**
-   * Choosing the best PWM frequency for your motors depends on a lot of factors.
-   *
-   * For most cases, just pick the highest frequency that you can get. For the
-   * comfort of you and any audience, pick a frequency that is outside the normal
-   * range of human hearing.
-   *
-   * Extremely high frequencies can result in losses in the motor drive. That is not
-   * going to be a problem with the standard UKMARSBOT.
-   *
-   */
-  // TODO: HARDWARE DEPENDENCY
-  enum { PWM_488_HZ, PWM_977_HZ, PWM_3906_HZ, PWM_31250_HZ };
-  void set_pwm_frequency(int frequency = PWM_31250_HZ) {
-/*    
-    switch (frequency) {
-      case PWM_31250_HZ:
-        // Divide by 1. frequency = 31.25 kHz;
-        bitClear(TCCR1B, CS11);
-        bitSet(TCCR1B, CS10);
-        break;
-      case PWM_3906_HZ:
-        // Divide by 8. frequency = 3.91 kHz;
-        bitSet(TCCR1B, CS11);
-        bitClear(TCCR1B, CS10);
-        break;
-      case PWM_488_HZ:
-      default:
-        // Divide by 64. frequency = 488Hz;
-        bitSet(TCCR1B, CS11);
-        bitSet(TCCR1B, CS10);
-        break;
+  void set_right_motor_pwm(int pwm) 
+  {
+    float fPwm = float(MOTOR_RIGHT_POLARITY * constrain(pwm, -MOTOR_MAX_PWM, MOTOR_MAX_PWM)) / (MOTOR_MAX_PWM+1);
+    if (fPwm < 0) 
+    {
+      motorRightA.write(1.0f+fPwm);
+      motorRightB.write(1.0f);
+    } 
+    else 
+    {
+      motorRightA.write(1.0f);
+      motorRightB.write(1.0f-fPwm);
     }
-*/    
   }
 
   /**
@@ -352,6 +327,13 @@ class Motors {
   }
 
  private:
+  // we use the mbed call rather than the Arduino interfaces to access the PWM channels as it gives us more 
+  // control of PWM frequency etc. and also a much faster interface
+  mbed::PwmOut motorLeftA;
+  mbed::PwmOut motorLeftB;
+  mbed::PwmOut motorRightA;
+  mbed::PwmOut motorRightB;
+ 
   bool m_controller_output_enabled = false;
   bool m_feedforward_enabled = true;
   float m_previous_fwd_error = 0;

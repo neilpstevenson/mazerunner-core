@@ -126,12 +126,6 @@ class AnalogueConverter {
     analogin_init(&m_halObject[1], p27);
     analogin_init(&m_halObject[2], p28);
     analogin_init(&m_halObject[3], p29);
-//    // Change the clock prescaler from 128 to 32 for a 500kHz clock
-//    bitSet(ADCSRA, ADPS2);
-//    bitClear(ADCSRA, ADPS1);
-//    bitSet(ADCSRA, ADPS0);
-    // Set the reference to AVcc and right adjust the result
-//    ADMUX = DEFAULT << 6;
   }
 
   void start_conversion_cycle() {
@@ -155,31 +149,8 @@ class AnalogueConverter {
     m_adc_lit[3] = analogin_read_u16(&m_halObject[3]) >> 4;
     // Emitters off
     digitalWrite(emitter_front(), 0);
-/*
-    if (not m_configured) {
-      return;
-    }
-
-    m_phase = 1;  // sync up the start of the sensor sequence
-    m_channel = 0;
-    bitSet(ADCSRA, ADIE);         // enable the ADC interrupt
-    start_conversion(m_channel);  // begin a conversion to get things started
-*/    
-  }
-/*
-  void end_conversion_cycle() {
-    bitClear(ADCSRA, ADIE);  // disable the ADC interrupt
   }
 
-  void start_conversion(uint8_t channel) {
-    ADMUX = (ADMUX & 0xF0) | (channel & 0x0F);  // select the channel
-    sbi(ADCSRA, ADSC);                          // start the conversion
-  }
-
-  int get_adc_result() {
-    return ADC;
-  }
-*/
   int get_lit(const int i) const {
     return m_adc_lit[i];
   }
@@ -195,65 +166,6 @@ class AnalogueConverter {
     }
     return diff;
   }
-/*
-  /// Perform a 'manual' conversion of a channel
-  /// should not be used if the interrupt-driven sequencer is on
-  int do_conversion(uint8_t channel) {
-    start_conversion(channel);
-    while (ADCSRA & (1 << ADSC)) {
-      // do nothing
-    }
-    return get_adc_result();
-  }
-
-  void callback_adc_isr() {
-    switch (m_phase) {
-      case 1:
-        // cycle through all 8 channels with emitters off
-        m_adc_dark[m_channel] = get_adc_result();
-        m_channel++;
-        start_conversion(m_channel);
-        if (m_channel >= MAX_CHANNELS) {
-          m_phase = 2;
-        }
-        break;
-      case 2:
-        get_adc_result();  // dummy read to clear interrupt flag
-        if (m_emitters_enabled) {
-          digitalWrite(emitter_diagonal(), 1);
-          digitalWrite(emitter_front(), 1);
-        }
-        m_channel = 0;
-        start_conversion(m_channel);  // Start a conversion to generate the interrupt
-        m_phase = 3;
-        break;
-      case 3:
-        // skip one cycle for the detectors to respond
-        get_adc_result();  // dummy read clears the interrupt flag
-        start_conversion(m_channel);
-        m_phase = 4;
-        break;
-      case 4:
-        // cycle through the channels again with the emitters on
-        // avoid zero result so we know it is working
-        m_adc_lit[m_channel] = max(1, get_adc_result());
-        m_channel++;
-        start_conversion(m_channel);
-        if (m_channel >= MAX_CHANNELS) {
-          m_phase = 13;
-        }
-        break;
-      case 13:
-      default:
-        get_adc_result();  // dummy read clears the interrupt flag
-        // unconditionally turn off emitters for safety
-        digitalWrite(emitter_diagonal(), 0);
-        digitalWrite(emitter_front(), 0);
-        bitClear(ADCSRA, ADIE);  // turn off the interrupt
-        break;
-    }
-  }
-*/
 
  private:
   analogin_t m_halObject[MAX_CHANNELS];
