@@ -54,6 +54,17 @@ struct TurnParameters {
   int trigger;       //         - front sensor value at start of turn
 };
 
+struct SpeedParameters {
+  bool search;              // true to search, false to do a speed-run only
+  bool smooth_turns;        // true to use smooth turns, false for in-place turns
+  int forward_speed;        // mm/s    - forward speed one cell
+  int acceleration;         // mm/s/s  - acceleration
+  int forward_speed_2;      // mm/s    - forward speed 2 cells or more
+  int backing_speed;        // mm/s    - back-up speed (alignment move)
+  float spin_omega;         // deg/s   - maximum angular velocity
+  float spin_alpha;         // deg/s/s - angular acceleration
+};
+
 /*************************************************************************/
 /***
  * You may use a slightly different hardware platform than UKMARSBOT
@@ -69,7 +80,7 @@ struct TurnParameters {
 #define HARDWARE_MONTY_MINI 4
 
 /// define the choice for this build
-#define HARDWARE_TYPE HARDWARE_MONTY_MINI
+#define HARDWARE_TYPE HARDWARE_MONTY_TWINS_PURPLE
 
 /// include the relevant config file
 #if HARDWARE_TYPE == HARDWARE_UKMARSBOT_1_3A
@@ -135,7 +146,7 @@ const float HALF_CELL = FULL_CELL / 2.0;
 #define ROBOT_MONTY_MINI 5
 
 /// this is the variant you are building for.
-#define ROBOT ROBOT_MONTY_MINI
+#define ROBOT ROBOT_MONTY_TWINS_PURPLE
 
 #if ROBOT == ROBOT_CORE_OSMIUM
 #include "config-robot-osmium.h"

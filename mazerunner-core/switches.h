@@ -69,6 +69,10 @@ class Switches {
     return !digitalRead(SWITCH_GO_PIN);
   }
 
+  inline bool button_select_pressed() {
+    return !digitalRead(SWITCH_SELECT_PIN);
+  }
+
 /*
   Simulate the switches using the "select" button to cycle around the options
 */
@@ -79,7 +83,7 @@ class Switches {
     if(!last_button_state)
     {
       // Button was not pressed previously 
-      if(!digitalRead(SWITCH_SELECT_PIN))
+      if(button_select_pressed())
       {
         // Button down for a while
         if(++debounce == 5 )
@@ -100,7 +104,7 @@ class Switches {
     else
     {
       // Button was pressed previously 
-      if(digitalRead(SWITCH_SELECT_PIN))
+      if(!button_select_pressed())
       {
         // Button up for a while
         if(++debounce == 10 )
@@ -138,6 +142,12 @@ class Switches {
     wait_for_button_press();
     wait_for_button_release();
     delay(250);
+  }
+
+  void wait_for_select_button_release() {
+    while (button_select_pressed()) {
+      delay(10);
+    };
   }
 
   // for testing

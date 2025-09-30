@@ -256,7 +256,7 @@ const float ROT_KP = 16 * ROT_TM / (ROT_KM * ROT_ZETA * ROT_ZETA * ROT_TD * ROT_
 const float ROT_KD = LOOP_FREQUENCY * (8 * ROT_TM - ROT_TD) / (ROT_KM * ROT_TD);
 
 // controller constants for the steering controller
-const float STEERING_KP = 0.0005; //0.005; //0.05; //0.25;
+const float STEERING_KP = 0.001; //0.0005; //0.005; //0.05; //0.25;
 const float STEERING_KD = 0.00;
 const float STEERING_ADJUST_LIMIT = 10.0;  // deg/s
 
@@ -273,17 +273,17 @@ const float STEERING_ADJUST_LIMIT = 10.0;  // deg/s
 
 //***** PERFORMANCE CONSTANTS************************************************//
 // search and run speeds in mm/s and mm
-const int SEARCH_SPEED = 400;
-const int SEARCH_ACCELERATION = 1800; //2000;
-const int SEARCH_TURN_SPEED = 300;
-const int SMOOTH_TURN_SPEED = 500;
-const int FAST_TURN_SPEED = 600;
-const int FAST_RUN_SPEED_MAX = 2500;
+const int SEARCH_SPEED_DEFAULT = 500;
+const int SEARCH_ACCELERATION_DEFAULT = 2000;
+const int SEARCH_TURN_SPEED_DEFAULT = 300;
+//const int SMOOTH_TURN_SPEED = 500;
+//const int FAST_TURN_SPEED = 600;
+//const int FAST_RUN_SPEED_MAX = 2500;
 
-const float FAST_RUN_ACCELERATION = 3000;
+//const float FAST_RUN_ACCELERATION = 3000;
 
-const int OMEGA_SPIN_TURN = 360;
-const int ALPHA_SPIN_TURN = 3600;
+const int OMEGA_SPIN_TURN_DEFAULT = 360;
+const int ALPHA_SPIN_TURN_DEFAULT = 3600;
 
 //***** SENSOR SCALING ******************************************************//
 // This is the normalised value seen by the front sensor when the mouse is
@@ -316,16 +316,67 @@ const int RIGHT_EDGE_POS = 20;
 // the position in the cell where the sensors are sampled.
 const float SENSING_POSITION = 170.0;  // HALF_CELL + 40mm, i.e. around 65mm before a subsequent 1/2 size wall
 
-// clang-format off
-// These take no storage - the compiler uses the values directly
-const TurnParameters turn_params[4] = {
-    //           speed, entry,   exit, angle, omega,  alpha, sensor threshold
-    {SEARCH_TURN_SPEED,    70,     70,  90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
-    {SEARCH_TURN_SPEED,    70,     70, -90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
-    {SEARCH_TURN_SPEED,    70,     70,  90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
-    {SEARCH_TURN_SPEED,    70,     70, -90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
+// Speed profiles
+SpeedParameters speed_parameters_base = {
+  true,                         // true to search, false to do a speed-run only
+  true,                         // true to use smooth turns, false for in-place turns
+  SEARCH_SPEED_DEFAULT,         // mm/s    - forward speed one cell
+  SEARCH_ACCELERATION_DEFAULT,  // mm/s/s  - acceleration
+  SEARCH_SPEED_DEFAULT * 3/2,   // mm/s    - forward speed 2 cells or more
+  SEARCH_SPEED_DEFAULT / 4,     // mm/s    - back-up speed (alignment move)
+  OMEGA_SPIN_TURN_DEFAULT,      // deg/s   - maximum angular velocity
+  ALPHA_SPIN_TURN_DEFAULT       // deg/s/s - angular acceleration
 };
-// clang-format on
+
+SpeedParameters speed_parameters_faster = {
+  true,                         // true to search, false to do a speed-run only
+  true,                         // true to use smooth turns, false for in-place turns
+  SEARCH_SPEED_DEFAULT * 12/10, // mm/s    - forward speed one cell
+  SEARCH_ACCELERATION_DEFAULT * 12/10,  // mm/s/s  - acceleration
+  SEARCH_SPEED_DEFAULT * 36/20, // mm/s    - forward speed 2 cells or more
+  SEARCH_SPEED_DEFAULT / 4,     // mm/s    - back-up speed (alignment move)
+  OMEGA_SPIN_TURN_DEFAULT,      // deg/s   - maximum angular velocity
+  ALPHA_SPIN_TURN_DEFAULT       // deg/s/s - angular acceleration
+};
+
+SpeedParameters speed_parameters_speed_run = {
+  false,                         // true to search, false to do a speed-run only
+  true,                          // true to use smooth turns, false for in-place turns
+  SEARCH_SPEED_DEFAULT * 14/10,  // mm/s    - forward speed one cell
+  SEARCH_ACCELERATION_DEFAULT * 14/10,   // mm/s/s  - acceleration
+  SEARCH_SPEED_DEFAULT * 32/20,   // mm/s    - forward speed 2 cells or more
+  SEARCH_SPEED_DEFAULT / 4,     // mm/s    - back-up speed (alignment move)
+  OMEGA_SPIN_TURN_DEFAULT,      // deg/s   - maximum angular velocity
+  ALPHA_SPIN_TURN_DEFAULT       // deg/s/s - angular acceleration
+};
+
+SpeedParameters *speed_parameters = &speed_parameters_base;
+
+TurnParameters turn_params_base[4] = {
+    //           speed, entry,   exit, angle, omega,  alpha, sensor threshold
+    {SEARCH_TURN_SPEED_DEFAULT,  70,     70,  90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
+    {SEARCH_TURN_SPEED_DEFAULT,  70,     70, -90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
+    {SEARCH_TURN_SPEED_DEFAULT,  70,     70,  90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
+    {SEARCH_TURN_SPEED_DEFAULT,  70,     70, -90.0, 280.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
+};
+
+TurnParameters turn_params_faster[4] = {
+    //           speed, entry,   exit, angle, omega,  alpha, sensor threshold
+    {SEARCH_TURN_SPEED_DEFAULT,  70,     60,  90.0, 400.0 /*280.0*/, 5000.0 /*4000.0*/, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
+    {SEARCH_TURN_SPEED_DEFAULT,  70,     60, -90.0, 400.0, 5000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
+    {SEARCH_TURN_SPEED_DEFAULT,  70,     60,  90.0, 400.0, 5000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
+    {SEARCH_TURN_SPEED_DEFAULT,  70,     60, -90.0, 400.0, 5000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
+};
+
+TurnParameters turn_params_speed_run[4] = {
+    //           speed, entry,   exit, angle, omega,  alpha, sensor threshold
+    {SEARCH_TURN_SPEED_DEFAULT,   70,     60,  90.0, 450.0 /*280.0*/, 6000.0 /*4000.0*/, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
+    {SEARCH_TURN_SPEED_DEFAULT,   70,     60, -90.0, 450.0, 6000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
+    {SEARCH_TURN_SPEED_DEFAULT,   70,     60,  90.0, 450.0, 6000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
+    {SEARCH_TURN_SPEED_DEFAULT,   70,     60, -90.0, 450.0, 6000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
+};
+
+TurnParameters *turn_params = turn_params_base;
 
 //***************************************************************************//
 // Battery resistor bridge //Derek Hall//

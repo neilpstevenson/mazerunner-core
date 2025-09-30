@@ -86,12 +86,12 @@ void setup() {
   systick.begin();
   /// keep the button held down after a reset to clear the maze
   /// otherwise you will use the last-saved map.
-  if (switches.button_pressed() || maze_init != MAZE_INIT_MAGIC_NUMBER) {
+  if (switches.button_select_pressed() || maze_init != MAZE_INIT_MAGIC_NUMBER) {
     maze.initialise();
     maze_init = MAZE_INIT_MAGIC_NUMBER;
     mouse.blink(2);
     SerialPort.println(F("Maze cleared"));
-    switches.wait_for_button_release();
+    switches.wait_for_select_button_release();
   }
   else
   {

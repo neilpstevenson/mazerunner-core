@@ -361,13 +361,19 @@ class CommandLineInterface {
         mouse.show_sensor_calibration();
         break;
       case 2:
+        speed_parameters = &speed_parameters_base;
+        turn_params = turn_params_base;
         mouse.search_maze();
         break;
-      case 3: {
-        mouse.follow_to(maze.goal());
-      } break;
+      case 3: 
+        speed_parameters = &speed_parameters_faster;
+        turn_params = turn_params_faster;
+        mouse.search_maze();
+        break;
       case 4:
-        mouse.test_SS90E();
+        speed_parameters = &speed_parameters_speed_run;
+        turn_params = turn_params_speed_run;
+        mouse.search_maze();
         break;
       case 5:
         mouse.test_turn_right_left();
@@ -387,6 +393,12 @@ class CommandLineInterface {
         break;
       case 10:
         mouse.test_log_position_sensors();
+        break;
+      case 11: {
+        mouse.follow_to(maze.goal());
+      } break;
+      case 12:
+        mouse.test_SS90E();
         break;
       default:
         // just to be safe...
@@ -414,6 +426,10 @@ class CommandLineInterface {
    *
    */
   void help() {
+    SerialPort.println();
+    SerialPort.println(F(CODE));
+    SerialPort.println(F(NAME));
+    SerialPort.println();
     SerialPort.println(F("?   : this text"));
     SerialPort.println(F("X   : reset maze"));
     SerialPort.println(F("W   : display maze walls"));
@@ -425,16 +441,16 @@ class CommandLineInterface {
     SerialPort.println(F("       0 = ---"));
     SerialPort.println(F("       1 = Sensor Static Calibration"));
     SerialPort.println(F("       2 = Search to the goal and back"));
-    SerialPort.println(F("       3 = Follow a wall to the goal"));
-    SerialPort.println(F("       4 = Test SS90E Turn"));
+    SerialPort.println(F("       3 = Faster Search to the goal and back"));
+    SerialPort.println(F("       4 = Speed run to the goal and back"));
     SerialPort.println(F("       5 = Test Right-Left Turns"));
     SerialPort.println(F("       6 = Test Edge Detect Position"));
     SerialPort.println(F("       7 = Sensor Spin Calibration"));
     SerialPort.println(F("       8 = Log front sensors"));
     SerialPort.println(F("       9 = Test 1000mm forward"));
     SerialPort.println(F("      10 = Test encoder sensors"));
-    SerialPort.println(F("      11 = "));
-    SerialPort.println(F("      12 = "));
+    SerialPort.println(F("      11 = Follow a wall to the goal"));
+    SerialPort.println(F("      12 = Test SS90E Turn"));
     SerialPort.println(F("      13 = "));
     SerialPort.println(F("      14 = "));
     SerialPort.println(F("      15 = "));
