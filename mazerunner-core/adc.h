@@ -132,24 +132,32 @@ class AnalogueConverter {
     // Dark
     for(int m_channel = 0; m_channel < MAX_CHANNELS; m_channel++)
        m_adc_dark[m_channel] = analogin_read_u16(&m_halObject[m_channel]) >> 4;
+
     // Lit - sides
-    if (m_emitters_enabled) {
-      digitalWrite(emitter_diagonal(), 1);
-    }
-    wait_ns(ILLUMINATION_TO_ADC_DELAY_NS);
-    m_adc_lit[RSS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[RSS_ADC_CHANNEL]) >> 4;
-    m_adc_lit[LSS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[LSS_ADC_CHANNEL]) >> 4;
-    digitalWrite(emitter_diagonal(), 0);
+    {ATOMIC 
+    {
+      if (m_emitters_enabled) {
+        digitalWrite(emitter_diagonal(), 1);
+      }
+      wait_ns(ILLUMINATION_TO_ADC_DELAY_NS);
+      m_adc_lit[RSS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[RSS_ADC_CHANNEL]) >> 4;
+      m_adc_lit[LSS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[LSS_ADC_CHANNEL]) >> 4;
+      digitalWrite(emitter_diagonal(), 0);
+    }}
+
     // Lit - front
-    if (m_emitters_enabled) {
-      digitalWrite(emitter_front(), 1);
-    }
-    wait_ns(ILLUMINATION_TO_ADC_DELAY_NS);
-    m_adc_lit[RFS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[RFS_ADC_CHANNEL]) >> 4;
-    if(RFS_ADC_CHANNEL != LFS_ADC_CHANNEL)
-      m_adc_lit[LFS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[LFS_ADC_CHANNEL]) >> 4;
-    // Emitters off
-    digitalWrite(emitter_front(), 0);
+    {ATOMIC 
+    {
+      if (m_emitters_enabled) {
+        digitalWrite(emitter_front(), 1);
+      }
+      wait_ns(ILLUMINATION_TO_ADC_DELAY_NS);
+      m_adc_lit[RFS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[RFS_ADC_CHANNEL]) >> 4;
+      if(RFS_ADC_CHANNEL != LFS_ADC_CHANNEL)
+        m_adc_lit[LFS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[LFS_ADC_CHANNEL]) >> 4;
+      // Emitters off
+      digitalWrite(emitter_front(), 0);
+    }}
   }
 
   int get_lit(const int i) const {
