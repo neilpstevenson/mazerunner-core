@@ -60,25 +60,25 @@ RAW values for the front sensor when the robot is backed up to a wall
 // wall sensor thresholds and constants
 // RAW values for the front sensor when the robot is backed up to a wall
 // with another wall ahead
-const int FRONT_LEFT_CALIBRATION = 1486;
-const int FRONT_RIGHT_CALIBRATION = 1932;
+const int FRONT_LEFT_CALIBRATION = 1560; //1486;
+const int FRONT_RIGHT_CALIBRATION = 2060; //1932;
 // RAW values for the side sensors when the robot is centered in a cell
 // and there is no wall ahead
-const int LEFT_CALIBRATION = 2475;
-const int RIGHT_CALIBRATION = 1737;
+const int LEFT_CALIBRATION = 2730; //2475;
+const int RIGHT_CALIBRATION = 1990; //1737;
 
 // The front linear constant is the value of k needed to make the function
 // sensors.get_distance(sensor,k) return 68mm (half=30mm) when the mouse is backed up
 // against a wall with only a wall ahead
 const int FRONT_LINEAR_CONSTANT = 420; //i.e = sqrt(sum(FL,FR)) * 68
-const int FRONT_REFERENCE = 350;  // sum reading when mouse centered with wall ahead
+const int FRONT_REFERENCE = 320; //350;  // sum reading when mouse centered with wall ahead
 
 // SS90E turn thresholds. This is the front sum reading to trigger a turn
 // it changes a bit if there is an adjacent wall. The threshold is set for
 // when the robot is 20mm past the cell boundary. That is, the distance
 // from the front of the mouse to the wall ahead is 92mm (half=50mm)
-const int TURN_THRESHOLD_SS90E = 118;
-const int EXTRA_WALL_ADJUST = 0; //5;
+const int TURN_THRESHOLD_SS90E = 122; //118;
+const int EXTRA_WALL_ADJUST = 3; //5;
 
 // Threshold used for starting the robot runs
 const int OCCLUDED_THRESHOLD_FRONT_RAW = 2500;
@@ -87,28 +87,28 @@ const int OCCLUDED_THRESHOLD_FRONT_RAW = 2500;
 // wall sensor thresholds and constants
 // RAW values for the front sensor when the robot is backed up to a wall
 // with another wall ahead
-const int FRONT_LEFT_CALIBRATION = 2010; //3844;
-const int FRONT_RIGHT_CALIBRATION = 1800; //3815;
+const int FRONT_LEFT_CALIBRATION = 1560; //1486;
+const int FRONT_RIGHT_CALIBRATION = 2060; //1932;
 // RAW values for the side sensors when the robot is centered in a cell
 // and there is no wall ahead
-const int LEFT_CALIBRATION = 1804;
-const int RIGHT_CALIBRATION = 1695;
+const int LEFT_CALIBRATION = 2730; //2475;
+const int RIGHT_CALIBRATION = 1990; //1737;
 
 // The front linear constant is the value of k needed to make the function
-// sensors.get_distance(sensor,k) return 68mm (15mm) when the mouse is backed up
+// sensors.get_distance(sensor,k) return 68mm (half=30mm) when the mouse is backed up
 // against a wall with only a wall ahead
 const int FRONT_LINEAR_CONSTANT = 420; //i.e = sqrt(sum(FL,FR)) * 68
-const int FRONT_REFERENCE = 350;  // reading when mouse centered with wall ahead
+const int FRONT_REFERENCE = 320; //350;  // sum reading when mouse centered with wall ahead
 
 // SS90E turn thresholds. This is the front sum reading to trigger a turn
 // it changes a bit if there is an adjacent wall. The threshold is set for
 // when the robot is 20mm past the cell boundary. That is, the distance
-// from the front of the mouse to the wall ahead is 92mm
-const int TURN_THRESHOLD_SS90E = 104;
-const int EXTRA_WALL_ADJUST = 5;
+// from the front of the mouse to the wall ahead is 92mm (half=50mm)
+const int TURN_THRESHOLD_SS90E = 122; //118;
+const int EXTRA_WALL_ADJUST = 3; //5;
 
 // Threshold used for starting the robot runs
-const int OCCLUDED_THRESHOLD_FRONT_RAW = 2000;
+const int OCCLUDED_THRESHOLD_FRONT_RAW = 2500;
 
 #endif
 
@@ -152,7 +152,7 @@ const int REPORTING_INTERVAL = 10;
 //***************************************************************************//
 // Some physical constants that are likely to be robot-specific
 // with robot against back wall, how much travel is there to the cell center?
-const int BACK_WALL_TO_CENTER = HALF_CELL-5 - 27; //58;
+const int BACK_WALL_TO_CENTER = /*HALF_CELL-WALL*/ 90 - 27; // = 63;
 
 //***************************************************************************//
 // We need to know about the drive mechanics.
@@ -163,7 +163,7 @@ const int BACK_WALL_TO_CENTER = HALF_CELL-5 - 27; //58;
 // out the wheel diameter.
 const float ENCODER_PULSES = 12.00;
 const float GEAR_RATIO = 7;
-const float WHEEL_DIAMETER = 22.80;
+const float WHEEL_DIAMETER = 22.90; //22.80;
 
 // Mouse radius is the distance between the contact patches of the drive wheels.
 // A good starting approximation is half the distance between the wheel centres.
@@ -171,14 +171,14 @@ const float WHEEL_DIAMETER = 22.80;
 // small amount. AFTER you have the wheel diameter and gear ratio calibrated,
 // have the mouse turn in place and adjust the MOUSE_RADIUS until these turns are
 // as accurate as you can get them
-const float MOUSE_RADIUS = 24.0; // Adjust on test - smaller make it turn less
+const float MOUSE_RADIUS = 24.2;//24.0; // Adjust on test - smaller make it turn less
 
 // The robot is likely to have wheels of different diameters or motors of slightly
 // different characteristics and that must be compensated for if the robot is to
 // reliably drive in a straight line.
 // This number adjusts the encoder count and must be  added to the right
 // and subtracted from the left motor.
-const float ROTATION_BIAS = 0.001; // Negative makes robot curve to left
+const float ROTATION_BIAS = 0.000; //0.001; // Negative makes robot curve to left
 
 // Now we can pre-calculate the key constats for the motion control
 const float MM_PER_COUNT = PI * WHEEL_DIAMETER / (ENCODER_PULSES * GEAR_RATIO);
@@ -242,9 +242,9 @@ const float ROT_KP = 16 * ROT_TM / (ROT_KM * ROT_ZETA * ROT_ZETA * ROT_TD * ROT_
 const float ROT_KD = LOOP_FREQUENCY * (8 * ROT_TM - ROT_TD) / (ROT_KM * ROT_TD);
 
 // controller constants for the steering controller
-const float STEERING_KP = 0.001; //0.0005;
-const float STEERING_KD = 0.00;
-const float STEERING_ADJUST_LIMIT = 10.0;  // deg/s
+const float STEERING_KP = 0.002; //0.0005;
+const float STEERING_KD = 0.0001;
+const float STEERING_ADJUST_LIMIT = 20.0;  // deg/s
 
 // encoder polarity is either 1 or -1 and is used to account for reversal of the encoder phases
 //#define ENCODER_LEFT_POLARITY (1)
@@ -290,9 +290,9 @@ const float LEFT_SCALE = (float)SIDE_NOMINAL / LEFT_CALIBRATION;
 const float RIGHT_SCALE = (float)SIDE_NOMINAL / RIGHT_CALIBRATION;
 
 // the values above which, a wall is seen
-const int LEFT_THRESHOLD = 50;   // minimum value to register a wall
+const int LEFT_THRESHOLD = 55;   // minimum value to register a wall
 const int RIGHT_THRESHOLD = 50;  // minimum value to register a wall
-const int FRONT_THRESHOLD = 70;  // minimum value to register a wall
+const int FRONT_THRESHOLD = 80;  // minimum value to register a wall
 
 // the distance through the cell at which the corresponding sensor
 // will see a falling edge
@@ -338,28 +338,30 @@ SpeedParameters speed_parameters_speed_run = {
 
 SpeedParameters *speed_parameters = &speed_parameters_base;
 
+//Note: Entry - smaller makes it take a wider arc around the corner
+//      Exit - bigger makes it cut the corner more
 TurnParameters turn_params_base[4] = {
-    //           speed, entry,   exit, angle, omega,  alpha, sensor threshold
-    {SEARCH_TURN_SPEED_DEFAULT,  70,     60,  90.0, 450.0 /*280.0*/, 6000.0 /*4000.0*/, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
-    {SEARCH_TURN_SPEED_DEFAULT,  70,     60, -90.0, 450.0, 6000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
-    {SEARCH_TURN_SPEED_DEFAULT,  70,     60,  90.0, 450.0, 6000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
-    {SEARCH_TURN_SPEED_DEFAULT,  70,     60, -90.0, 450.0, 6000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
+    //                  speed, entry,   exit, angle, omega,  alpha, sensor threshold
+    {SEARCH_TURN_SPEED_DEFAULT,  65,     65,  90.0, 450.0, 5000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
+    {SEARCH_TURN_SPEED_DEFAULT,  65,     65, -90.0, 450.0, 5000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
+    {SEARCH_TURN_SPEED_DEFAULT,  65,     65,  90.0, 450.0, 5000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
+    {SEARCH_TURN_SPEED_DEFAULT,  65,     65, -90.0, 450.0, 5000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
 };
 
 TurnParameters turn_params_faster[4] = {
-    //           speed, entry,   exit, angle, omega,  alpha, sensor threshold
-    {SEARCH_TURN_SPEED_DEFAULT,  80,     70,  90.0, 450.0 /*280.0*/, 6000.0 /*4000.0*/, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
-    {SEARCH_TURN_SPEED_DEFAULT,  80,     70, -90.0, 450.0, 6000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
-    {SEARCH_TURN_SPEED_DEFAULT,  80,     70,  90.0, 450.0, 6000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
-    {SEARCH_TURN_SPEED_DEFAULT,  80,     70, -90.0, 450.0, 6000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
+    //                  speed, entry,   exit, angle, omega,  alpha, sensor threshold
+    {SEARCH_TURN_SPEED_DEFAULT,  65,     75,  90.0, 550.0, 6500.0, TURN_THRESHOLD_SS90E-5}, // 0 => SS90EL
+    {SEARCH_TURN_SPEED_DEFAULT,  65,     75, -90.0, 550.0, 6500.0, TURN_THRESHOLD_SS90E-5}, // 0 => SS90ER
+    {SEARCH_TURN_SPEED_DEFAULT,  65,     75,  90.0, 550.0, 6500.0, TURN_THRESHOLD_SS90E-5}, // 0 => SS90L
+    {SEARCH_TURN_SPEED_DEFAULT,  65,     75, -90.0, 550.0, 6500.0, TURN_THRESHOLD_SS90E-5}, // 0 => SS90R
 };
 
 TurnParameters turn_params_speed_run[4] = {
-    //           speed, entry,   exit, angle, omega,  alpha, sensor threshold
-    {SEARCH_TURN_SPEED_DEFAULT,   90,     70,  90.0, 450.0 /*280.0*/, 6000.0 /*4000.0*/, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
-    {SEARCH_TURN_SPEED_DEFAULT,   90,     70, -90.0, 450.0, 6000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
-    {SEARCH_TURN_SPEED_DEFAULT,   90,     70,  90.0, 450.0, 6000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
-    {SEARCH_TURN_SPEED_DEFAULT,   90,     70, -90.0, 450.0, 6000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
+    //                  speed, entry,   exit, angle, omega,  alpha, sensor threshold
+    {SEARCH_TURN_SPEED_DEFAULT,   60,     75,  90.0, 600.0, 6500.0, TURN_THRESHOLD_SS90E-5}, // 0 => SS90EL
+    {SEARCH_TURN_SPEED_DEFAULT,   60,     75, -90.0, 600.0, 6500.0, TURN_THRESHOLD_SS90E-5}, // 0 => SS90ER
+    {SEARCH_TURN_SPEED_DEFAULT,   60,     75,  90.0, 600.0, 6500.0, TURN_THRESHOLD_SS90E-5}, // 0 => SS90L
+    {SEARCH_TURN_SPEED_DEFAULT,   60,     75, -90.0, 600.0, 6500.0, TURN_THRESHOLD_SS90E-5}, // 0 => SS90R
 };
 
 TurnParameters *turn_params = turn_params_base;

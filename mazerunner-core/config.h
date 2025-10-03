@@ -81,7 +81,7 @@ struct SpeedParameters {
 #define HARDWARE_HALF_MONTY 5
 
 /// define the choice for this build
-#define HARDWARE_TYPE HARDWARE_HALF_MONTY
+#define HARDWARE_TYPE HARDWARE_MONTY_MINI
 
 /// include the relevant config file
 #if HARDWARE_TYPE == HARDWARE_UKMARSBOT_1_3A
@@ -112,8 +112,9 @@ struct SpeedParameters {
 #define EVENT_APEC 4
 
 // choose the one you will be using BEFORE selecting the robot below
-//#define EVENT EVENT_UK
-#define EVENT EVENT_HOME
+#define EVENT EVENT_UK
+//#define EVENT EVENT_HOME
+
 #if EVENT == EVENT_HOME
 #define GOAL Location(4, 4)
 #else
@@ -142,7 +143,7 @@ struct SpeedParameters {
 #define ROBOT_HALF_MONTY 6
 
 /// this is the variant you are building for.
-#define ROBOT ROBOT_HALF_MONTY
+#define ROBOT ROBOT_MONTY_MINI
 
 #if ROBOT == ROBOT_CORE_OSMIUM
 #include "config-robot-osmium.h"
