@@ -61,12 +61,12 @@ RAW values for the front sensor when the robot is backed up to a wall
 // wall sensor thresholds and constants
 // RAW values for the front sensor when the robot is backed up to a wall
 // with another wall ahead
-const int FRONT_LEFT_CALIBRATION = 720; //742;
+const int FRONT_LEFT_CALIBRATION = 978;
 const int FRONT_RIGHT_CALIBRATION = FRONT_LEFT_CALIBRATION; // only one sensor
 // RAW values for the side sensors when the robot is centered in a cell
 // and there is no wall ahead
-const int LEFT_CALIBRATION = 210; //215;
-const int RIGHT_CALIBRATION = 290; //335;
+const int LEFT_CALIBRATION = 240;
+const int RIGHT_CALIBRATION = 345;
 
 // The front linear constant is the value of k needed to make the function
 // sensors.get_distance(sensor,k) return 68mm (half=30mm) when the mouse is backed up
@@ -88,12 +88,12 @@ const int OCCLUDED_THRESHOLD_FRONT_RAW = 1000;
 // wall sensor thresholds and constants
 // RAW values for the front sensor when the robot is backed up to a wall
 // with another wall ahead
-const int FRONT_LEFT_CALIBRATION = 720; //742;
+const int FRONT_LEFT_CALIBRATION = 978;
 const int FRONT_RIGHT_CALIBRATION = FRONT_LEFT_CALIBRATION; // only one sensor
 // RAW values for the side sensors when the robot is centered in a cell
 // and there is no wall ahead
-const int LEFT_CALIBRATION = 210; //215;
-const int RIGHT_CALIBRATION = 290; //335;
+const int LEFT_CALIBRATION = 240;
+const int RIGHT_CALIBRATION = 345;
 
 // The front linear constant is the value of k needed to make the function
 // sensors.get_distance(sensor,k) return 68mm (half=30mm) when the mouse is backed up
@@ -362,18 +362,18 @@ TurnParameters turn_params_base[4] = {
 
 TurnParameters turn_params_faster[4] = {
     //           speed, entry,   exit, angle, omega,  alpha, sensor threshold
-    {SEARCH_TURN_SPEED_DEFAULT,  70,     60,  90.0, 400.0 /*280.0*/, 5000.0 /*4000.0*/, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
-    {SEARCH_TURN_SPEED_DEFAULT,  70,     60, -90.0, 400.0, 5000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
-    {SEARCH_TURN_SPEED_DEFAULT,  70,     60,  90.0, 400.0, 5000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
-    {SEARCH_TURN_SPEED_DEFAULT,  70,     60, -90.0, 400.0, 5000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
+    {SEARCH_TURN_SPEED_DEFAULT,  75,     45,  90.0, 400.0, 5000.0, TURN_THRESHOLD_SS90E - 5}, // 0 => SS90EL
+    {SEARCH_TURN_SPEED_DEFAULT,  75,     45, -90.0, 400.0, 5000.0, TURN_THRESHOLD_SS90E - 5}, // 0 => SS90ER
+    {SEARCH_TURN_SPEED_DEFAULT,  75,     45,  90.0, 400.0, 5000.0, TURN_THRESHOLD_SS90E - 5}, // 0 => SS90L
+    {SEARCH_TURN_SPEED_DEFAULT,  75,     45, -90.0, 400.0, 5000.0, TURN_THRESHOLD_SS90E - 5}, // 0 => SS90R
 };
 
 TurnParameters turn_params_speed_run[4] = {
     //           speed, entry,   exit, angle, omega,  alpha, sensor threshold
-    {SEARCH_TURN_SPEED_DEFAULT,   70,     60,  90.0, 450.0 /*280.0*/, 6000.0 /*4000.0*/, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
-    {SEARCH_TURN_SPEED_DEFAULT,   70,     60, -90.0, 450.0, 6000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
-    {SEARCH_TURN_SPEED_DEFAULT,   70,     60,  90.0, 450.0, 6000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
-    {SEARCH_TURN_SPEED_DEFAULT,   70,     60, -90.0, 450.0, 6000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
+    {SEARCH_TURN_SPEED_DEFAULT,  75,     45,  90.0, 400.0, 5000.0, TURN_THRESHOLD_SS90E - 5}, // 0 => SS90EL
+    {SEARCH_TURN_SPEED_DEFAULT,  75,     45, -90.0, 400.0, 5000.0, TURN_THRESHOLD_SS90E - 5}, // 0 => SS90ER
+    {SEARCH_TURN_SPEED_DEFAULT,  75,     45,  90.0, 400.0, 5000.0, TURN_THRESHOLD_SS90E - 5}, // 0 => SS90L
+    {SEARCH_TURN_SPEED_DEFAULT,  75,     45, -90.0, 400.0, 5000.0, TURN_THRESHOLD_SS90E - 5}, // 0 => SS90R
 };
 
 TurnParameters *turn_params = turn_params_base;

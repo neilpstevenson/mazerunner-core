@@ -43,13 +43,13 @@ const uint8_t SWITCH_GO_PIN = 15;     // Left mezzanine switch
 //const uint8_t BATTERY_PIN = A7;
 
 // Delay between the sensor illuminator on to first ADC reading
-const int ILLUMINATION_TO_ADC_DELAY_NS = 20000;  // 100uS
+const int ILLUMINATION_TO_ADC_DELAY_NS = 50000;  // 100uS
 
 // SerialPort port
 const int SERIAL_PORT_TX = 0;
 const int SERIAL_PORT_RX = 1;
 
-#define USE_USB_SERIAL_PORT
+//#define USE_USB_SERIAL_PORT
 
 #ifdef USE_USB_SERIAL_PORT
 static UART &SerialPort = Serial;    // USB Serial

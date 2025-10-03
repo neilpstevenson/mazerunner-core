@@ -1,3 +1,4 @@
+#include "PinNames.h"
 /******************************************************************************
  * Project: mazerunner-core                                                   *
  * -----                                                                      *
@@ -129,35 +130,45 @@ class AnalogueConverter {
   }
 
   void start_conversion_cycle() {
-    // Dark
-    for(int m_channel = 0; m_channel < MAX_CHANNELS; m_channel++)
-       m_adc_dark[m_channel] = analogin_read_u16(&m_halObject[m_channel]) >> 4;
+    mbed::DigitalOut emDiag(PinName(emitter_diagonal()), 0);
+    mbed::DigitalOut emFront(PinName(emitter_front()), 0);
 
-    // Lit - sides
-    {ATOMIC 
-    {
-      if (m_emitters_enabled) {
-        digitalWrite(emitter_diagonal(), 1);
-      }
-      wait_ns(ILLUMINATION_TO_ADC_DELAY_NS);
-      m_adc_lit[RSS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[RSS_ADC_CHANNEL]) >> 4;
-      m_adc_lit[LSS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[LSS_ADC_CHANNEL]) >> 4;
-      digitalWrite(emitter_diagonal(), 0);
-    }}
+    // Dark
+    m_adc_dark[RSS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[RSS_ADC_CHANNEL]) >> 4;
+    m_adc_dark[LSS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[LSS_ADC_CHANNEL]) >> 4;
+    m_adc_dark[RFS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[RFS_ADC_CHANNEL]) >> 4;
+    if(RFS_ADC_CHANNEL != LFS_ADC_CHANNEL)
+      m_adc_dark[LFS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[LFS_ADC_CHANNEL]) >> 4;
 
     // Lit - front
     {ATOMIC 
     {
       if (m_emitters_enabled) {
-        digitalWrite(emitter_front(), 1);
+        emFront = 1;
+//        digitalWrite(emitter_front(), 1);
       }
       wait_ns(ILLUMINATION_TO_ADC_DELAY_NS);
       m_adc_lit[RFS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[RFS_ADC_CHANNEL]) >> 4;
       if(RFS_ADC_CHANNEL != LFS_ADC_CHANNEL)
         m_adc_lit[LFS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[LFS_ADC_CHANNEL]) >> 4;
       // Emitters off
-      digitalWrite(emitter_front(), 0);
+      emFront = 0;
+      //digitalWrite(emitter_front(), 0);
     }}
+    // Lit - sides
+    {ATOMIC 
+    {
+      if (m_emitters_enabled) {
+        emDiag = 1;
+        //digitalWrite(emitter_diagonal(), 1);
+      }
+      wait_ns(ILLUMINATION_TO_ADC_DELAY_NS);
+      m_adc_lit[RSS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[RSS_ADC_CHANNEL]) >> 4;
+      m_adc_lit[LSS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[LSS_ADC_CHANNEL]) >> 4;
+      emDiag = 0;
+      //digitalWrite(emitter_diagonal(), 0);
+    }}
+
   }
 
   int get_lit(const int i) const {
