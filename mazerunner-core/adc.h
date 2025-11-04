@@ -81,11 +81,16 @@
 class AnalogueConverter;
 
 extern AnalogueConverter adc;
+
 class AnalogueConverter {
  public:
   enum {
     MAX_CHANNELS = 4,
   };
+
+  AnalogueConverter() : m_emitter_front(PinName(EMITTER_FRONT)),
+                        m_emitter_diagonal(PinName(EMITTER_DIAGONAL))
+  {}
 
   void enable_emitters() {
     m_emitters_enabled = true;
@@ -98,28 +103,30 @@ class AnalogueConverter {
   // call this or nothing will work
   virtual void begin() {
     disable_emitters();
-    set_front_emitter_pin(EMITTER_FRONT);
-    set_side_emitter_pin(EMITTER_DIAGONAL);
+    //set_front_emitter_pin(EMITTER_FRONT);
+    //set_side_emitter_pin(EMITTER_DIAGONAL);
     converter_init();
     m_configured = true;
   };
 
-  void set_front_emitter_pin(uint8_t pin) {
-    pinMode(pin, OUTPUT);
-    m_emitter_front_pin = pin;
-  };
+  //void set_front_emitter_pin(uint8_t pin) {
+//    m_emitter_front = mbed::DigitalOut(PinName(pin), 0);
+    //pinMode(pin, OUTPUT);
+    //m_emitter_front_pin = pin;
+//  };
 
-  void set_side_emitter_pin(uint8_t pin) {
-    pinMode(pin, OUTPUT);
-    m_emitter_diagonal_pin = pin;
-  };
+//  void set_side_emitter_pin(uint8_t pin) {
+//    m_emitter_diagonal = mbed::DigitalOut(PinName(pin), 0);
+    //pinMode(pin, OUTPUT);
+    //m_emitter_diagonal_pin = pin;
+//  };
 
-  uint8_t emitter_front() {
-    return m_emitter_front_pin;
-  };
-  uint8_t emitter_diagonal() {
-    return m_emitter_diagonal_pin;
-  };
+  //uint8_t emitter_front() {
+    //return m_emitter_front_pin;
+  //};
+  //uint8_t emitter_diagonal() {
+    //return m_emitter_diagonal_pin;
+  //};
 
   void converter_init() {
     // Set up the HAL objects
@@ -127,11 +134,13 @@ class AnalogueConverter {
     analogin_init(&m_halObject[1], p27);
     analogin_init(&m_halObject[2], p28);
     analogin_init(&m_halObject[3], p29);
+    m_emitter_diagonal = 0;
+    m_emitter_front = 0;
   }
 
   void start_conversion_cycle() {
-    mbed::DigitalOut emDiag(PinName(emitter_diagonal()), 0);
-    mbed::DigitalOut emFront(PinName(emitter_front()), 0);
+    //mbed::DigitalOut emDiag(PinName(emitter_diagonal()), 0);
+    //mbed::DigitalOut emFront(PinName(emitter_front()), 0);
 
     // Dark
     m_adc_dark[RSS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[RSS_ADC_CHANNEL]) >> 4;
@@ -144,29 +153,26 @@ class AnalogueConverter {
     {ATOMIC 
     {
       if (m_emitters_enabled) {
-        emFront = 1;
-//        digitalWrite(emitter_front(), 1);
+        m_emitter_front = 1;
       }
       wait_ns(ILLUMINATION_TO_ADC_DELAY_NS);
       m_adc_lit[RFS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[RFS_ADC_CHANNEL]) >> 4;
       if(RFS_ADC_CHANNEL != LFS_ADC_CHANNEL)
         m_adc_lit[LFS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[LFS_ADC_CHANNEL]) >> 4;
       // Emitters off
-      emFront = 0;
-      //digitalWrite(emitter_front(), 0);
+      m_emitter_front = 0;
     }}
+
     // Lit - sides
     {ATOMIC 
     {
       if (m_emitters_enabled) {
-        emDiag = 1;
-        //digitalWrite(emitter_diagonal(), 1);
+        m_emitter_diagonal = 1;
       }
       wait_ns(ILLUMINATION_TO_ADC_DELAY_NS);
       m_adc_lit[RSS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[RSS_ADC_CHANNEL]) >> 4;
       m_adc_lit[LSS_ADC_CHANNEL] = analogin_read_u16(&m_halObject[LSS_ADC_CHANNEL]) >> 4;
-      emDiag = 0;
-      //digitalWrite(emitter_diagonal(), 0);
+      m_emitter_diagonal = 0;
     }}
 
   }
@@ -191,8 +197,10 @@ class AnalogueConverter {
   analogin_t m_halObject[MAX_CHANNELS];
   volatile int m_adc_dark[MAX_CHANNELS];
   volatile int m_adc_lit[MAX_CHANNELS];
-  uint8_t m_emitter_front_pin = -1;
-  uint8_t m_emitter_diagonal_pin = -1;
+  mbed::DigitalOut m_emitter_diagonal;
+  mbed::DigitalOut m_emitter_front;
+//  uint8_t m_emitter_front_pin = -1;
+//  uint8_t m_emitter_diagonal_pin = -1;
   uint8_t m_index = 0;
   bool m_emitters_enabled = false;
   bool m_configured = false;

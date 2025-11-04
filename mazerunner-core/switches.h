@@ -45,7 +45,7 @@ class Switches;
 // so that we can declare the instance
 extern Switches switches;
 
-const int MAX_SWITCH_VALUE = 12;
+const int MAX_SWITCH_VALUE = 13;
 
 class Switches {
  public:

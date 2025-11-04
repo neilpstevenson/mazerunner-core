@@ -1124,6 +1124,19 @@ void test_SS90E_Right() {
     sensors.disable();
   }
 
+  void test_raw_sensors()
+  {
+    sensors.enable();
+    while (not switches.button_pressed()) {
+      reporter.print_raw_sensors();
+      delay(20);
+    }
+    switches.wait_for_button_release();
+    SerialPort.println();
+    delay(200);
+    sensors.disable();
+  }
+
  private:
   Heading m_heading;
   Location m_location;

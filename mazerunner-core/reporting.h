@@ -319,6 +319,31 @@ class Reporter {
     printer.println();
   }
 
+  void print_raw_sensors() {
+    printer.print(F("|"));
+    print_justified(adc.get_dark(LFS_ADC_CHANNEL), 6);
+    print_justified(adc.get_dark(LSS_ADC_CHANNEL), 6);
+    print_justified(adc.get_dark(RSS_ADC_CHANNEL), 6);
+    print_justified(adc.get_dark(RFS_ADC_CHANNEL), 6);
+    printer.print(F("  | "));
+    print_justified(adc.get_lit(LFS_ADC_CHANNEL), 6);
+    print_justified(adc.get_lit(LSS_ADC_CHANNEL), 6);
+    print_justified(adc.get_lit(RSS_ADC_CHANNEL), 6);
+    print_justified(adc.get_lit(RFS_ADC_CHANNEL), 6);
+    printer.print(F("  | "));
+    print_justified(sensors.lfs.raw, 6);
+    print_justified(sensors.lss.raw, 6);
+    print_justified(sensors.rss.raw, 6);
+    print_justified(sensors.rfs.raw, 6);
+    printer.print(F("  | "));
+    print_justified(sensors.lfs.value, 6);
+    print_justified(sensors.lss.value, 6);
+    print_justified(sensors.rss.value, 6);
+    print_justified(sensors.rfs.value, 6);
+    printer.print(F("     | "));
+    printer.println();
+  }
+
   // void
 
   //***************************************************************************//

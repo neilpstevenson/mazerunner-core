@@ -400,6 +400,9 @@ class CommandLineInterface {
       case 12:
         mouse.test_SS90E();
         break;
+      case 13:
+        mouse.test_raw_sensors();
+        break;
       default:
         // just to be safe...
         sensors.disable();
@@ -451,7 +454,7 @@ class CommandLineInterface {
     SerialPort.println(F("      10 = Test encoder sensors"));
     SerialPort.println(F("      11 = Follow a wall to the goal"));
     SerialPort.println(F("      12 = Test SS90E Turn"));
-    SerialPort.println(F("      13 = "));
+    SerialPort.println(F("      13 = Test raw sensor readings"));
     SerialPort.println(F("      14 = "));
     SerialPort.println(F("      15 = "));
     SerialPort.println(F("SEARCH x y : search to location (x,y)"));
