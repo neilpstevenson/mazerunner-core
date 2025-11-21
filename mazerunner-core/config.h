@@ -67,39 +67,6 @@ struct SpeedParameters {
 
 /*************************************************************************/
 /***
- * You may use a slightly different hardware platform than UKMARSBOT
- * Here you can include a suitable hardware configuration to define
- * things like IO pins, ADC channels and so on
- */
-
-/// list the hardware platforms you can suport
-#define HARDWARE_UNKNOWN 0
-#define HARDWARE_UKMARSBOT_1_3A 1
-#define HARDWARE_MONTY_TWINS 2
-#define HARDWARE_MONTY_TWINS_PURPLE 3
-#define HARDWARE_MONTY_MINI 4
-#define HARDWARE_HALF_MONTY 5
-
-/// define the choice for this build
-#define HARDWARE_TYPE HARDWARE_MONTY_MINI
-
-/// include the relevant config file
-#if HARDWARE_TYPE == HARDWARE_UKMARSBOT_1_3A
-#include "config-ukmarsbot.h"
-#elif HARDWARE_TYPE == HARDWARE_MONTY_TWINS
-#include "config-montytwins.h"
-#elif HARDWARE_TYPE == HARDWARE_MONTY_TWINS_PURPLE
-#include "config-montytwins-purple.h"
-#elif HARDWARE_TYPE == HARDWARE_MONTY_MINI
-#include "config-monty-mini.h"
-#elif HARDWARE_TYPE == HARDWARE_HALF_MONTY
-#include "config-half-monty.h"
-#else
-#error "NO HARDWARE DEFINED"
-#endif
-
-/*************************************************************************/
-/***
  * It is possible that you might want to run the robot in a number of
  * different mazes with different calibration values. The config file
  * can have different sensor defaults for each of these environments
@@ -141,22 +108,32 @@ struct SpeedParameters {
 #define ROBOT_MONTY_TWINS_PURPLE 4
 #define ROBOT_MONTY_MINI 5
 #define ROBOT_HALF_MONTY 6
+#define ROBOT_HALF_MONTY_2 7
 
 /// this is the variant you are building for.
-#define ROBOT ROBOT_MONTY_MINI
+#define ROBOT ROBOT_HALF_MONTY_2
 
 #if ROBOT == ROBOT_CORE_OSMIUM
 #include "config-robot-osmium.h"
+#include "config-ukmarsbot.h"
 #elif ROBOT == ROBOT_ORION
 #include "config-robot-orion.h"
+#include "config-ukmarsbot.h"
 #elif ROBOT == ROBOT_MONTY_TWINS
+#include "config-hardware-gemini-green.h"
 #include "config-robot-montytwins.h"
 #elif ROBOT == ROBOT_MONTY_TWINS_PURPLE
+#include "config-hardware-gemini-purple.h"
 #include "config-robot-montytwins-purple.h"
 #elif ROBOT == ROBOT_MONTY_MINI
+#include "config-hardware-mini-rp2040zero.h"
 #include "config-robot-monty-mini.h"
 #elif ROBOT == ROBOT_HALF_MONTY
+#include "config-hardware-half-monty.h"
 #include "config-robot-half-monty.h"
+#elif ROBOT == ROBOT_HALF_MONTY_2
+#include "config-hardware-mini-rp2040zero.h"
+#include "config-robot-half-monty-2.h"
 #else
 #error "NO ROBOT DEFINED"
 #endif
