@@ -120,9 +120,13 @@ class Encoders {
       // Make sure values don't change while being read. Be quick.
       left_delta = encoder_l.reset_count();
       right_delta = encoder_r.reset_count();
-      //m_left_counter = 0;
-      //m_right_counter = 0;
     }
+    #ifdef ENCODER_LEFT_POLARITY
+    left_delta *= ENCODER_LEFT_POLARITY;
+    #endif
+    #ifdef ENCODER_RIGHT_POLARITY
+    right_delta *= ENCODER_RIGHT_POLARITY;
+    #endif
     float left_change = left_delta * MM_PER_COUNT_LEFT;
     float right_change = right_delta * MM_PER_COUNT_RIGHT;
     m_fwd_change = 0.5 * (right_change + left_change);
