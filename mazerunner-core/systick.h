@@ -68,13 +68,13 @@ class Systick {
     // digitalWriteFast(LED_BUILTIN, 1);
     // NOTE - the code here seems to get inlined and so the function is 2800 bytes!
     // grab the encoder values first because they will continue to change
+    adc.start_conversion_cycle();
     encoders.update();
     motion.update();
     sensors.update();
     battery.update();
 
     motors.update_controllers(motion.velocity(), motion.omega(), sensors.get_steering_feedback());
-    adc.start_conversion_cycle();
     // NOTE: no code should follow this line;
   }
 
