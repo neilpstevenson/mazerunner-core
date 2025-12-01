@@ -499,6 +499,29 @@ class Maze {
     return best_heading;
   }
 
+/***
+   * This looks ahead and counts the number of cells that could be traversed in a 
+   * straight line in the supplied direction. If any cell is yet unvisited, this 
+   * terminates the lookahead
+   *
+   * @brief get the number of free cells in the given direction
+   * @param start_cell
+   * @param heading
+   * @return
+   */
+  int count_cells_ahead(const Location start_cell, const Heading heading) const {
+    int count = 1;
+    Location current_cell = start_cell.neighbour(heading);
+    // Continue until we find a change of heading or an unknown cell
+    while( heading_to_smallest(current_cell, heading) == heading &&
+           !has_unknown_walls(current_cell))
+    {
+      ++count;
+      current_cell = current_cell.neighbour(heading);
+    }
+    return count;
+  }
+
  private:
   // Unconditionally set a wall state.
   // use update_wall_state() when exploring
