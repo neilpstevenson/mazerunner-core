@@ -319,6 +319,14 @@ class Motors {
     return volts;
   }
 
+  float get_fwd_error() {
+    float err = 0;
+    ATOMIC {
+      err = m_fwd_error;
+    }
+    return err;
+  }
+
   void set_speeds(float velocity, float omega) {
     ATOMIC {
       m_velocity = velocity;
