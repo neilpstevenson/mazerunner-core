@@ -170,6 +170,7 @@ class Reporter {
       print_justified(int(motion.angle()), 6);
       print_justified(int(motion.omega()), 6);
       print_justified(motors.get_fwd_millivolts(), 6);
+      print_justified(int(motors.get_fwd_error()), 6);
       print_justified(motors.get_rot_millivolts(), 6);
       printer.println();
     }

@@ -151,7 +151,11 @@ class Mouse {
   void turn_smooth(int turn_id) {
     TurnParameters params = turn_params[turn_id];
 
-    motion.set_target_velocity(params.speed);
+    ATOMIC {
+      motion.set_target_velocity(params.speed);
+      //forward.set_speed((params.speed + forward.speed())/2);    // Brutal slow down!
+      forward.set_speed(params.speed);    // Brutal slow down!
+    }
 
     float trigger = params.trigger;
     if (sensors.see_left_wall) {
@@ -199,25 +203,77 @@ class Mouse {
    */
   void stop_at_center() {
     bool has_wall = sensors.see_front_wall;
-    sensors.set_steering_mode(STEERING_OFF);
-    float remaining = (FULL_CELL + HALF_CELL) - motion.position();
-  //printf("-- remaining %f ---\n", remaining);
-    // finish at very low speed so we can adjust from the wall ahead if present
-    motion.start_move(remaining, motion.velocity(), 30, motion.acceleration());
-    if (has_wall) {
-      while (sensors.get_front_sum() < FRONT_REFERENCE) {
-  //printf("wall dist: %d\n", sensors.get_front_sum());
-        delay(2);
+    if(has_wall)
+    {
+      // Side sensors unreliable this close to wall
+      //sensors.set_steering_mode(STEERING_OFF);
+      // Move to within 10mm of expected position and then 
+      // crawl remainder until we're at the required position
+      #define APPROACH_SPEED 30
+      #define APPROACH_CHECK_DIST 5
+      float remaining, velocity, acceleration;
+      ATOMIC {
+        remaining = (FULL_CELL + HALF_CELL) - motion.position() - APPROACH_CHECK_DIST;
+        velocity = motion.velocity();
+        acceleration = motion.acceleration();
+        motion.start_move(remaining, velocity, APPROACH_SPEED, acceleration);
       }
-    } else {
-      while (not motion.move_finished()) {
-  //printf("no wall dist: %d\n", sensors.get_front_sum());
-        delay(2);
-      };
+#ifdef DEBUG_LOGGING
+      SerialPort.print(remaining);  SerialPort.print(" ");
+      SerialPort.print(velocity);SerialPort.print(" ");
+      SerialPort.print(APPROACH_SPEED);SerialPort.print(" ");
+      SerialPort.print(acceleration);SerialPort.print(" ");
+      SerialPort.println();
+#endif
+      while (sensors.get_front_sum() < FRONT_REFERENCE) {
+        //printf("wall dist: %d\n", sensors.get_front_sum());
+#ifdef DEBUG_LOGGING
+        SerialPort.println();
+        reporter.report_profile();
+        //reporter.print_wall_sensors();
+        reporter.log_action_status('C', 'S', m_location, m_heading);
+#endif
+        delay(1);
+      }
+      // Side sensors unreliable this close to wall
+      sensors.set_steering_mode(STEERING_OFF);
+      //printf("stop dist: %d\n", sensors.get_front_sum());
+      // Be sure robot has come to a halt.
+      {ATOMIC {
+        motion.start_move(5, motion.velocity(), 0, motion.acceleration());
+      }
+      while (!motion.move_finished()) {
+        //printf("wall dist: %d\n", sensors.get_front_sum());
+#ifdef DEBUG_LOGGING
+        SerialPort.println();
+        reporter.report_profile();
+        //reporter.print_wall_sensors();
+        reporter.log_action_status('C', 'F', m_location, m_heading);
+#endif
+        delay(1);
+      }}
     }
+    else
+    {
+      sensors.set_steering_mode(STEER_NORMAL);
+      float remaining = (FULL_CELL + HALF_CELL) - motion.position();
+      motion.move(remaining, motion.velocity(), 0, motion.acceleration());
+    }
+
     // Be sure robot has come to a halt.
-  //printf("stop dist: %d\n", sensors.get_front_sum());
     motion.stop_move();
+    motors.reset_controllers();
+
+#ifdef DEBUG_LOGGING_OFF
+    for(int d = 0; d < 100; d++)
+    {
+      delay(10);
+      SerialPort.println();
+      reporter.report_profile();
+      //reporter.print_wall_sensors();
+      reporter.log_action_status('C', 'D', m_location, m_heading);
+    }
+#endif
   }
 
   //***************************************************************************//
@@ -229,9 +285,35 @@ class Mouse {
    * Then it just waits until it gets to the next sensing position.
    */
   void move_ahead() {
-    motion.set_target_velocity(speed_parameters->forward_speed);
-    motion.adjust_forward_position(-FULL_CELL);
-    motion.wait_until_position(SENSING_POSITION);
+    // How many cells can we move?
+    int cell_count = maze.count_cells_ahead(m_location, m_heading);
+    SerialPort.println();
+    SerialPort.print("Cells ahead: ");
+    SerialPort.println(cell_count);
+
+    ATOMIC {
+      float current_position = motion.position();
+      #define MOVE_AHEAD_DECEL_EXTRA 10
+      motion.start_move(cell_count * FULL_CELL - (current_position - FULL_CELL) - MOVE_AHEAD_DECEL_EXTRA, 
+                        cell_count > 1 ? speed_parameters->forward_speed_2 : speed_parameters->forward_speed, 
+                        speed_parameters->forward_speed, speed_parameters->acceleration);
+      // Offset by overrun distance to arrive back at the sensing position travelling at the normal speed
+      motion.adjust_forward_position(current_position - FULL_CELL);
+    }
+    //motion.set_target_velocity(speed_parameters->forward_speed);
+    //motion.adjust_forward_position(-FULL_CELL);
+    for(int cell = 0; cell < cell_count; cell++)
+    {
+      motion.wait_until_position(SENSING_POSITION + cell*FULL_CELL);
+      SerialPort.print("Reached cell: ");
+      SerialPort.println(cell+1);
+      // Don't move ahead on the last cell - will automatically do that in the main loop
+      if(cell < cell_count-1)
+      {
+        m_location = m_location.neighbour(m_heading);
+      }
+    }
+    motion.adjust_forward_position(-FULL_CELL * (cell_count-1));
   }
 
   //***************************************************************************//
@@ -304,12 +386,25 @@ class Mouse {
     reporter.log_action_status('B', ' ', m_location, m_heading);
     stop_at_center();
     sensors.set_steering_mode(STEERING_OFF);
-    turn_IP90L();
-    // Back into wall and re-centre
-    motion.move(-(BACK_WALL_TO_CENTER+10), speed_parameters->backing_speed, 0, speed_parameters->acceleration);
-    motors.reset_controllers();
-    motion.move(BACK_WALL_TO_CENTER, speed_parameters->backing_speed, 0, speed_parameters->acceleration);
-    turn_IP90L();
+    // Turn away from the nearest wall
+    if(sensors.rss.value >= sensors.lss.value)
+    {
+      turn_IP90L();
+      // Back into wall and re-centre
+      motion.move(-(BACK_WALL_TO_CENTER+10), speed_parameters->backing_speed, 0, speed_parameters->acceleration);
+      motors.reset_controllers();
+      motion.move(BACK_WALL_TO_CENTER, speed_parameters->backing_speed, 0, speed_parameters->acceleration);
+      turn_IP90L();
+    }
+    else
+    {
+      turn_IP90R();
+      // Back into wall and re-centre
+      motion.move(-(BACK_WALL_TO_CENTER+10), speed_parameters->backing_speed, 0, speed_parameters->acceleration);
+      motors.reset_controllers();
+      motion.move(BACK_WALL_TO_CENTER, speed_parameters->backing_speed, 0, speed_parameters->acceleration);
+      turn_IP90R();
+    }
     // Back into wall
     motion.move(-(BACK_WALL_TO_CENTER+10), speed_parameters->backing_speed, 0, speed_parameters->acceleration);
     motors.reset_controllers();
@@ -457,6 +552,7 @@ class Mouse {
    */
 
   void search_to(Location target) {
+    maze.set_mask(MASK_OPEN);   // Treat unknown cell walls as open gaps
     maze.flood(target);
     delay(200);
     sensors.enable();
@@ -485,7 +581,9 @@ class Mouse {
         break;
       }
       SerialPort.println();
+      //SerialPort.println(encoders.robot_distance());
 #ifdef DEBUG_LOGGING
+      reporter.report_profile();
       reporter.print_wall_sensors();
 #endif
       reporter.log_action_status('-', ' ', m_location, m_heading);
@@ -496,8 +594,20 @@ class Mouse {
       unsigned char newHeading = maze.heading_to_smallest(m_location, m_heading);
       unsigned char hdgChange = (newHeading - m_heading) & 0x3;
       if (m_location != target) {
-        if(newHeading == BLOCKED)
+        if(newHeading == BLOCKED )//|| m_location.y > 1)
         {
+          motion.stop_move();
+          for(int i = 0; i < 5; i++)
+          {
+#ifdef DEBUG_LOGGING
+            //SerialPort.println(encoders.robot_distance());
+            SerialPort.println();
+            reporter.report_profile();
+            reporter.print_wall_sensors();
+            reporter.log_action_status('P', 'P', m_location, m_heading);
+#endif
+            delay(10);
+          }
           motion.stop();
           sensors.set_steering_mode(STEERING_OFF);
           sensors.disable();
@@ -601,7 +711,7 @@ class Mouse {
     sensors.set_steering_mode(STEERING_OFF);
     motion.move(BACK_WALL_TO_CENTER, speed_parameters->forward_speed, speed_parameters->forward_speed, speed_parameters->acceleration);
     motion.set_position(HALF_CELL);
-    Serial.println(F("Off we go..."));
+    Serial.println(F("Search. Off we go..."));
     motion.wait_until_position(SENSING_POSITION);
     // at the start of this loop we are always at the sensing point
     while (m_location != target) {
@@ -668,8 +778,91 @@ class Mouse {
    * always be one of the four cardinal directions NESW
    */
   void run_to(Location target) {
-    (void)target;
-    //// Not implemented
+    maze.set_mask(MASK_CLOSED);   // Treat unknown cell walls as blocked, so we don't enter theses cells
+    maze.flood(target);
+    delay(200);
+    sensors.enable();
+    motion.reset_drive_system();
+    sensors.set_steering_mode(STEERING_OFF);  // never steer from zero speed
+    if (not m_handStart) {
+      // back up to the wall behind
+      // TODO: what if there is not a wall?
+      // perhaps the caller should decide so this ALWAYS starts at the cell centre?
+      motion.move(-BACK_WALL_TO_CENTER, speed_parameters->backing_speed, 0, speed_parameters->acceleration);
+    }
+    motion.move(BACK_WALL_TO_CENTER, speed_parameters->forward_speed, speed_parameters->forward_speed, speed_parameters->acceleration);
+    motion.set_position(HALF_CELL);
+    SerialPort.print(F("Speed run. Off we go..."));
+    SerialPort.print('[');
+    SerialPort.print(target.x);
+    SerialPort.print(',');
+    SerialPort.print(target.y);
+    SerialPort.print(']');
+    SerialPort.println();
+
+    motion.wait_until_position(SENSING_POSITION);
+    // Each iteration of this loop starts at the sensing point
+    while (m_location != target) {
+      if (switches.button_pressed()) {  // allow user to abort gracefully
+        break;
+      }
+      SerialPort.println();
+#ifdef DEBUG_LOGGING
+      reporter.print_wall_sensors();
+#endif
+      reporter.log_action_status('-', ' ', m_location, m_heading);
+      sensors.set_steering_mode(STEER_NORMAL);
+      m_location = m_location.neighbour(m_heading);  // the cell we are about to enter
+      //update_map();
+      //maze.flood(target);
+      unsigned char newHeading = maze.heading_to_smallest(m_location, m_heading);
+      unsigned char hdgChange = (newHeading - m_heading) & 0x3;
+      if (m_location != target) {
+        if(newHeading == BLOCKED)
+        {
+          motion.stop();
+          sensors.set_steering_mode(STEERING_OFF);
+          sensors.disable();
+          motion.disable_drive();
+          SerialPort.println();
+          SerialPort.println(F("NO ROUTE TO TARGET!"));
+          panic();
+          return;
+        }
+        switch (hdgChange) {
+          // each of the following actions will finish with the
+          // robot moving and at the sensing point ready for the
+          // next loop iteration
+          case AHEAD:
+            indicators.indicateForward();
+            move_ahead();
+            break;
+          case RIGHT:
+            indicators.indicateRightTurn();
+            turn_right();
+            break;
+          case BACK:
+            indicators.indicateAboutTurn();
+            turn_back();
+            break;
+          case LEFT:
+            indicators.indicateLeftTurn();
+            turn_left();
+            break;
+        }
+      }
+    }
+    // we are entering the target cell so come to an orderly
+    // halt in the middle of that cell
+    stop_at_center();
+    sensors.disable();
+    SerialPort.println();
+    SerialPort.println(F("Arrived!  "));
+    delay(250);
+    motion.reset_drive_system();
+    sensors.set_steering_mode(STEERING_OFF);
+    indicators.indicateTurnsOff();
+    indicators.blink(4, 0, 16, 0); // Green
   }
 
   /****************************************************************************/
@@ -763,12 +956,62 @@ class Mouse {
     m_location = START;
     m_heading = NORTH;
     search_to(maze.goal());
-    maze.flood(START);
 
+    // Search back to start
+    maze.flood(START);
     Heading best_direction = maze.heading_to_smallest(m_location, m_heading);
     turn_to_face(best_direction);
     m_handStart = false;  // Assumes central in a cell
     search_to(START);
+
+    // Rotate and back up to original start position
+    turn_to_face(NORTH);
+    motion.move(-(BACK_WALL_TO_CENTER+10), speed_parameters->backing_speed, 0, speed_parameters->acceleration);
+    motion.stop();
+    motion.disable_drive();
+    return 0;
+  }
+
+/****************************************************************************/
+  /***
+   * The mouse is expected to be in the start cell heading NORTH
+   * The maze may, or may not, have been searched.
+   * There may, or may not, be a solution.
+   *
+   * This simple searcher will just search to goal, turn around and
+   * search back to the start. At that point there will be a route
+   * but it is unlikely to be optimal.
+   *
+   * the mouse can run this route by creating a path that does not
+   * pass through unvisited cells.
+   *
+   * A better searcher will continue until a path generated through all
+   * cells, regardless of visited state, does not pass through any
+   * unvisited cells.
+   *
+   * The return value is not currently used but could indicate whether
+   * the maze is 'solved'. That is, whether there is any need to search
+   * further.
+   *
+   */
+  int fast_run() {
+    sensors.wait_for_user_start();
+    SerialPort.println(F("Fast run TO"));
+    m_handStart = true; // Assumes backed-up against a wall
+    m_location = START;
+    m_heading = NORTH;
+    run_to(maze.goal());
+
+    // Search back to start, in case this yields anything better
+    speed_parameters = &speed_parameters_base;  
+    turn_params = turn_params_base;
+    maze.flood(START);
+    Heading best_direction = maze.heading_to_smallest(m_location, m_heading);
+    turn_to_face(best_direction);
+    m_handStart = false;  // Assumes central in a cell
+    search_to(START);
+
+    // Rotate and back up to original start position
     turn_to_face(NORTH);
     motion.move(-(BACK_WALL_TO_CENTER+10), speed_parameters->backing_speed, 0, speed_parameters->acceleration);
     motion.stop();
@@ -974,9 +1217,9 @@ void test_log_position_sensors() {
     motion.reset_drive_system();
     sensors.set_steering_mode(STEERING_OFF);
     // move to the boundary with the next cell
-    float distance = BACK_WALL_TO_CENTER + HALF_CELL;
+    float distance = BACK_WALL_TO_CENTER + HALF_CELL + SENSING_POSITION;  // From backed-up to wall, travel to sensing position in 2nd cell
     motion.move(distance,  speed_parameters->forward_speed, speed_parameters->forward_speed,  speed_parameters->acceleration);
-    motion.set_position(FULL_CELL);
+    motion.set_position(SENSING_POSITION);
 
     if (side == RIGHT_START) {
       turn_smooth(SS90ER);
@@ -987,9 +1230,9 @@ void test_log_position_sensors() {
     // changes in the side sensor readings
     int sensor_left = sensors.lss.value;
     int sensor_right = sensors.rss.value;
-    // move two cells. The resting position of the mouse have the
+    // move a full cell. The resting position of the mouse have the
     // same offset as the turn ending
-    motion.move(2 * FULL_CELL, speed_parameters->forward_speed, 0,  speed_parameters->acceleration);
+    motion.move(FULL_CELL, speed_parameters->forward_speed, 0,  speed_parameters->acceleration);
     sensor_left -= sensors.lss.value;
     sensor_right -= sensors.rss.value;
     reporter.print_justified(sensor_left, 5);

@@ -83,7 +83,7 @@ struct SpeedParameters {
 #define EVENT EVENT_HOME
 
 #if EVENT == EVENT_HOME
-#define GOAL Location(4, 4)
+#define GOAL Location(3, 7)
 #else
 #define GOAL Location(7, 7)
 #endif

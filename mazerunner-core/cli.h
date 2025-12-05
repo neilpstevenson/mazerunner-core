@@ -363,17 +363,26 @@ class CommandLineInterface {
       case 2:
         speed_parameters = &speed_parameters_base;
         turn_params = turn_params_base;
-        mouse.search_maze();
+        if(speed_parameters->search)
+          mouse.search_maze();
+        else
+          mouse.fast_run();
         break;
       case 3: 
         speed_parameters = &speed_parameters_faster;
         turn_params = turn_params_faster;
-        mouse.search_maze();
+        if(speed_parameters->search)
+          mouse.search_maze();
+        else
+          mouse.fast_run();
         break;
       case 4:
         speed_parameters = &speed_parameters_speed_run;
         turn_params = turn_params_speed_run;
-        mouse.search_maze();
+        if(speed_parameters->search)
+          mouse.search_maze();
+        else
+          mouse.fast_run();
         break;
       case 5:
         mouse.test_turn_right_left();
