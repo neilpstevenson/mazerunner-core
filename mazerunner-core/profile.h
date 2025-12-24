@@ -236,7 +236,7 @@ class Profile {
     // The number is a hack to ensure floating point rounding errors do not prevent the
     // loop termination. The units are mm and independent of the encoder resolution.
     // I figure that being within 1/8 of a mm will be close enough.
-    if (m_state != PS_FINISHED && remaining < 0.125) {
+    if (m_state != PS_FINISHED && remaining < MM_PER_COUNT /*0.125*/) {
       m_state = PS_FINISHED;
       m_target_speed = m_final_speed;
     }

@@ -194,11 +194,15 @@ const float DEG_PER_MM_DIFFERENCE = (180.0 / (2 * MOUSE_RADIUS * PI));
 const float LOOP_FREQUENCY = 500.0;
 const float LOOP_INTERVAL = (1.0 / LOOP_FREQUENCY);
 
+// Since we have a low-res encoder on the motor, use a n-stage averager as a 
+// filter to reduce controller spikes in the D-term
+const int ENCODER_AVERAGER_LENGTH = 8;
+
 // Dynamic performance constants
 // There is a video describing how to get these numbers and calculate the feedforward
 // constnats here: https://youtu.be/BrabDeHGsa0
-const float FWD_KM = 1200.0; //87500; //2500; //1200.0; //900.0;  // mm/s/Volt
-const float FWD_TM = 0.190; //0.000091428; //0.150; //0.220; //0.190; //0.220;  // forward time constant
+const float FWD_KM = 153.8; //208.0; //1200.0; //87500; //2500; //1200.0; //900.0;  // mm/s/Volt
+const float FWD_TM = 0.054; //0.0208; //0.190; //0.000091428; //0.150; //0.220; //0.190; //0.220;  // forward time constant
 const float ROT_KM = 1500.0;  // deg/s/Volt
 const float ROT_TM = 0.250;  // rotation time constant
 
@@ -223,18 +227,18 @@ const float MAX_MOTOR_VOLTS = 6.0;
 
 const float SPEED_FF = (1.0 / FWD_KM);
 const float ACC_FF = (FWD_TM / FWD_KM);
-const float BIAS_FF = 0.1; //0.6;
+const float BIAS_FF = 0.07; //0.1; //0.6;
 const float TOP_SPEED = (MAX_MOTOR_VOLTS - BIAS_FF) / SPEED_FF;
 
 //*** MOTION CONTROL CONSTANTS **********************************************//
 
 // forward motion controller constants
-const float FWD_ZETA = 0.707;
-const float FWD_TD = FWD_TM;
+const float FWD_ZETA = 0.707; //0.985; //0.707;
+const float FWD_TD = 0.200; //0.080; //FWD_TM;
 
-const float FWD_KP = 2.0; //16 * FWD_TM / (FWD_KM * FWD_ZETA * FWD_ZETA * FWD_TD * FWD_TD);
+const float FWD_KP = 16 * FWD_TM / (FWD_KM * FWD_ZETA * FWD_ZETA * FWD_TD * FWD_TD);
   // == 16/(FWD_KM*2 * FWD_TM^2)
-const float FWD_KD = 0.02; //LOOP_FREQUENCY * (8 * FWD_TM - FWD_TD) / (FWD_KM * FWD_TD);
+const float FWD_KD = LOOP_FREQUENCY * (8 * FWD_TM - FWD_TD) / (FWD_KM * FWD_TD);
     // == 500 * 7/FWD_KM
 
 // rotation motion controller constants
@@ -266,11 +270,6 @@ const int SEARCH_SPEED_DEFAULT = 400; //500;
 //const int SEARCH_ACCELERATION_DEFAULT = 3000; //2000;
 #define SEARCH_ACCEL_HALF_CELL(speed) (speed*speed/(45-10)/2)   // Acceleration to stop in half a cell - 10
 const int SEARCH_TURN_SPEED_DEFAULT = 200;
-//const int SMOOTH_TURN_SPEED = 500;
-//const int FAST_TURN_SPEED = 600;
-//const int FAST_RUN_SPEED_MAX = 2500;
-
-//const float FAST_RUN_ACCELERATION = 3000;
 
 const int OMEGA_SPIN_TURN_DEFAULT = 360;
 const int ALPHA_SPIN_TURN_DEFAULT = 3600;
@@ -327,24 +326,14 @@ SpeedParameters speed_parameters_faster = {
   SEARCH_SPEED_DEFAULT / 4,     // mm/s    - back-up speed (alignment move)
   OMEGA_SPIN_TURN_DEFAULT,      // deg/s   - maximum angular velocity
   ALPHA_SPIN_TURN_DEFAULT       // deg/s/s - angular acceleration
-/*
-  true,                         // true to search, false to do a speed-run only
-  false,                         // true to use smooth turns, false for in-place turns
-  SEARCH_SPEED_DEFAULT * 12/10, // mm/s    - forward speed one cell
-  SEARCH_ACCEL_HALF_CELL(SEARCH_SPEED_DEFAULT * 12/10),  // mm/s/s  - acceleration
-  SEARCH_SPEED_DEFAULT * 36/20, // mm/s    - forward speed 2 cells or more
-  SEARCH_SPEED_DEFAULT / 4,     // mm/s    - back-up speed (alignment move)
-  OMEGA_SPIN_TURN_DEFAULT,      // deg/s   - maximum angular velocity
-  ALPHA_SPIN_TURN_DEFAULT       // deg/s/s - angular acceleration
-*/  
 };
 
 SpeedParameters speed_parameters_speed_run = {
   false,                         // true to search, false to do a speed-run only
   true,                          // true to use smooth turns, false for in-place turns
-  SEARCH_SPEED_DEFAULT * 5/4,  // mm/s    - forward speed one cell
-  SEARCH_ACCEL_HALF_CELL(SEARCH_SPEED_DEFAULT * 5/4),   // mm/s/s  - acceleration
-  SEARCH_SPEED_DEFAULT * 5/2,   // mm/s    - forward speed 2 cells or more
+  SEARCH_SPEED_DEFAULT,  // mm/s    - forward speed one cell
+  SEARCH_ACCEL_HALF_CELL(SEARCH_SPEED_DEFAULT),   // mm/s/s  - acceleration
+  SEARCH_SPEED_DEFAULT * 4/2,   // mm/s    - forward speed 2 cells or more
   SEARCH_SPEED_DEFAULT / 4,     // mm/s    - back-up speed (alignment move)
   OMEGA_SPIN_TURN_DEFAULT,      // deg/s   - maximum angular velocity
   ALPHA_SPIN_TURN_DEFAULT       // deg/s/s - angular acceleration
@@ -354,6 +343,7 @@ SpeedParameters *speed_parameters = &speed_parameters_base;
 
 //Note: Entry - distance before the half-cell position that we start the turn. Smaller makes it turn deeper into the cell
 //      Exit - resulting distance past the half-cell position following the turn. Bigger means it ended up further into the cell (must be smaller than sensing position-half cell)
+//      Omega - Max angular velocity, Alpha - angular acceleration
 TurnParameters turn_params_base[4] = {
     //                  speed, entry,   exit, angle, omega,  alpha, sensor threshold
     {SEARCH_TURN_SPEED_DEFAULT,  40,     15,  90.0, 650.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
@@ -364,10 +354,10 @@ TurnParameters turn_params_base[4] = {
 
 TurnParameters turn_params_faster[4] = {
     //                  speed, entry,   exit, angle, omega,  alpha, sensor threshold
-    {SEARCH_TURN_SPEED_DEFAULT,  35,     15,  90.0, 550.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
-    {SEARCH_TURN_SPEED_DEFAULT,  35,     15, -90.0, 550.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
-    {SEARCH_TURN_SPEED_DEFAULT,  35,     15,  90.0, 550.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
-    {SEARCH_TURN_SPEED_DEFAULT,  35,     15, -90.0, 550.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
+    {SEARCH_TURN_SPEED_DEFAULT,  35,     21,  90.0, 500.0, 4500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
+    {SEARCH_TURN_SPEED_DEFAULT,  35,     21, -90.0, 500.0, 4500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
+    {SEARCH_TURN_SPEED_DEFAULT,  35,     21,  90.0, 500.0, 4500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
+    {SEARCH_TURN_SPEED_DEFAULT,  35,     21, -90.0, 500.0, 4500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
 };
 
 TurnParameters turn_params_speed_run[4] = {

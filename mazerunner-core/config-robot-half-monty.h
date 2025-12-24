@@ -61,12 +61,12 @@ RAW values for the front sensor when the robot is backed up to a wall
 // wall sensor thresholds and constants
 // RAW values for the front sensor when the robot is backed up to a wall
 // with another wall ahead
-const int FRONT_LEFT_CALIBRATION = 2000; //3720;
-const int FRONT_RIGHT_CALIBRATION = 1550; //3430;
+const int FRONT_LEFT_CALIBRATION = 2096; //3720;
+const int FRONT_RIGHT_CALIBRATION = 1555; //3430;
 // RAW values for the side sensors when the robot is centered in a cell
 // and there is no wall ahead
-const int LEFT_CALIBRATION = 1550; //1810;
-const int RIGHT_CALIBRATION = 1450; //1900;
+const int LEFT_CALIBRATION = 1730; //1550; //1810;
+const int RIGHT_CALIBRATION = 1730; //1450; //1900;
 
 // The front linear constant is the value of k needed to make the function
 // sensors.get_distance(sensor,k) return 68mm (half=30mm) when the mouse is backed up
@@ -207,11 +207,15 @@ const float DEG_PER_MM_DIFFERENCE = (180.0 / (2 * MOUSE_RADIUS * PI));
 const float LOOP_FREQUENCY = 500.0;
 const float LOOP_INTERVAL = (1.0 / LOOP_FREQUENCY);
 
+// Since we have a low-res encoder on the motor, use a n-stage averager as a 
+// filter to reduce controller spikes in the D-term
+const int ENCODER_AVERAGER_LENGTH = 8;
+
 // Dynamic performance constants
 // There is a video describing how to get these numbers and calculate the feedforward
 // constnats here: https://youtu.be/BrabDeHGsa0
-const float FWD_KM = 475.0;  // mm/s/Volt
-const float FWD_TM = 0.190;  // forward time constant
+const float FWD_KM = 98.0; //475.0;  // mm/s/Volt
+const float FWD_TM = 0.049; //0.190;  // forward time constant
 const float ROT_KM = 775.0;  // deg/s/Volt
 const float ROT_TM = 0.210;  // rotation time constant
 
@@ -236,14 +240,14 @@ const float MAX_MOTOR_VOLTS = 6.0;
 
 const float SPEED_FF = (1.0 / FWD_KM);
 const float ACC_FF = (FWD_TM / FWD_KM);
-const float BIAS_FF = 0.08; //0.121;
-const float TOP_SPEED = (6.0 - BIAS_FF) / SPEED_FF;
+const float BIAS_FF = 0.07; //0.08; //0.121;
+const float TOP_SPEED = (MAX_MOTOR_VOLTS - BIAS_FF) / SPEED_FF;
 
 //*** MOTION CONTROL CONSTANTS **********************************************//
 
 // forward motion controller constants
-const float FWD_ZETA = 0.707;
-const float FWD_TD = FWD_TM;
+const float FWD_ZETA = 0.817; //0.707;
+const float FWD_TD = 0.194; // FWD_TM;
 
 const float FWD_KP = 16 * FWD_TM / (FWD_KM * FWD_ZETA * FWD_ZETA * FWD_TD * FWD_TD);
 const float FWD_KD = LOOP_FREQUENCY * (8 * FWD_TM - FWD_TD) / (FWD_KM * FWD_TD);
@@ -256,9 +260,9 @@ const float ROT_KP = 16 * ROT_TM / (ROT_KM * ROT_ZETA * ROT_ZETA * ROT_TD * ROT_
 const float ROT_KD = LOOP_FREQUENCY * (8 * ROT_TM - ROT_TD) / (ROT_KM * ROT_TD);
 
 // controller constants for the steering controller
-const float STEERING_KP = 0.005; //0.05; //0.25;
-const float STEERING_KD = 0.00;
-const float STEERING_ADJUST_LIMIT = 10.0;  // deg/s
+const float STEERING_KP = 0.002;
+const float STEERING_KD = 0.0001;
+const float STEERING_ADJUST_LIMIT = 20.0;  // deg/s
 
 // encoder polarity is either 1 or -1 and is used to account for reversal of the encoder phases
 //#define ENCODER_LEFT_POLARITY (1)
@@ -274,8 +278,9 @@ const float STEERING_ADJUST_LIMIT = 10.0;  // deg/s
 //***** PERFORMANCE CONSTANTS************************************************//
 // search and run speeds in mm/s and mm
 const int SEARCH_SPEED_DEFAULT = 400; //220;
-const int SEARCH_ACCELERATION_DEFAULT = 1800; //2000;
-const int SEARCH_TURN_SPEED_DEFAULT = 300; //200;
+#define SEARCH_ACCEL_HALF_CELL(speed) (speed*speed/(45-10)/2)   // Acceleration to stop in half a cell - 10
+//const int SEARCH_ACCELERATION_DEFAULT = 1800; //2000;
+const int SEARCH_TURN_SPEED_DEFAULT = 200; //300; //200;
 
 const int OMEGA_SPIN_TURN_DEFAULT = 360;
 const int ALPHA_SPIN_TURN_DEFAULT = 3600;
@@ -299,9 +304,9 @@ const float LEFT_SCALE = (float)SIDE_NOMINAL / LEFT_CALIBRATION;
 const float RIGHT_SCALE = (float)SIDE_NOMINAL / RIGHT_CALIBRATION;
 
 // the values above which, a wall is seen
-const int LEFT_THRESHOLD = 55;   // minimum value to register a wall
-const int RIGHT_THRESHOLD = 55;  // minimum value to register a wall
-const int FRONT_THRESHOLD = 65; //48; //60;  // minimum value to register a wall
+const int LEFT_THRESHOLD = 55; //55;   // minimum value to register a wall
+const int RIGHT_THRESHOLD = 55; //55;  // minimum value to register a wall
+const int FRONT_THRESHOLD = 55; //65; //48; //60;  // minimum value to register a wall
 
 // the distance through the cell at which the corresponding sensor
 // will see a falling edge
@@ -316,7 +321,7 @@ SpeedParameters speed_parameters_base = {
   true,                         // true to search, false to do a speed-run only
   false,                        // true to use smooth turns, false for in-place turns
   SEARCH_SPEED_DEFAULT,         // mm/s    - forward speed one cell
-  SEARCH_ACCELERATION_DEFAULT,  // mm/s/s  - acceleration
+  SEARCH_ACCEL_HALF_CELL(SEARCH_SPEED_DEFAULT),  // mm/s/s  - acceleration
   SEARCH_SPEED_DEFAULT * 3/2,   // mm/s    - forward speed 2 cells or more
   SEARCH_SPEED_DEFAULT / 4,     // mm/s    - back-up speed (alignment move)
   OMEGA_SPIN_TURN_DEFAULT,      // deg/s   - maximum angular velocity
@@ -325,10 +330,10 @@ SpeedParameters speed_parameters_base = {
 
 SpeedParameters speed_parameters_faster = {
   true,                         // true to search, false to do a speed-run only
-  false,                         // true to use smooth turns, false for in-place turns
-  SEARCH_SPEED_DEFAULT * 12/10, // mm/s    - forward speed one cell
-  SEARCH_ACCELERATION_DEFAULT * 12/10,  // mm/s/s  - acceleration
-  SEARCH_SPEED_DEFAULT * 36/20, // mm/s    - forward speed 2 cells or more
+  true,                        // true to use smooth turns, false for in-place turns
+  SEARCH_SPEED_DEFAULT,         // mm/s    - forward speed one cell
+  SEARCH_ACCEL_HALF_CELL(SEARCH_SPEED_DEFAULT),  // mm/s/s  - acceleration
+  SEARCH_SPEED_DEFAULT * 3/2,   // mm/s    - forward speed 2 cells or more
   SEARCH_SPEED_DEFAULT / 4,     // mm/s    - back-up speed (alignment move)
   OMEGA_SPIN_TURN_DEFAULT,      // deg/s   - maximum angular velocity
   ALPHA_SPIN_TURN_DEFAULT       // deg/s/s - angular acceleration
@@ -336,10 +341,10 @@ SpeedParameters speed_parameters_faster = {
 
 SpeedParameters speed_parameters_speed_run = {
   false,                         // true to search, false to do a speed-run only
-  false,                          // true to use smooth turns, false for in-place turns
-  SEARCH_SPEED_DEFAULT * 14/10,  // mm/s    - forward speed one cell
-  SEARCH_ACCELERATION_DEFAULT * 14/10,   // mm/s/s  - acceleration
-  SEARCH_SPEED_DEFAULT * 32/20,   // mm/s    - forward speed 2 cells or more
+  true,                          // true to use smooth turns, false for in-place turns
+  SEARCH_SPEED_DEFAULT,  // mm/s    - forward speed one cell
+  SEARCH_ACCEL_HALF_CELL(SEARCH_SPEED_DEFAULT),   // mm/s/s  - acceleration
+  SEARCH_SPEED_DEFAULT * 4/2,   // mm/s    - forward speed 2 cells or more
   SEARCH_SPEED_DEFAULT / 4,     // mm/s    - back-up speed (alignment move)
   OMEGA_SPIN_TURN_DEFAULT,      // deg/s   - maximum angular velocity
   ALPHA_SPIN_TURN_DEFAULT       // deg/s/s - angular acceleration
@@ -348,27 +353,27 @@ SpeedParameters speed_parameters_speed_run = {
 SpeedParameters *speed_parameters = &speed_parameters_base;
 
 TurnParameters turn_params_base[4] = {
-    //           speed, entry,   exit, angle, omega,  alpha, sensor threshold
-    {SEARCH_TURN_SPEED_DEFAULT,  40,     40,  90.0, 280.0, 4800.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
-    {SEARCH_TURN_SPEED_DEFAULT,  40,     40, -90.0, 280.0, 4800.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
-    {SEARCH_TURN_SPEED_DEFAULT,  40,     40,  90.0, 280.0, 4800.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
-    {SEARCH_TURN_SPEED_DEFAULT,  40,     40, -90.0, 280.0, 4800.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
+    //                  speed, entry,   exit, angle, omega,  alpha, sensor threshold
+    {SEARCH_TURN_SPEED_DEFAULT,  40,     15,  90.0, 650.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
+    {SEARCH_TURN_SPEED_DEFAULT,  40,     15, -90.0, 650.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
+    {SEARCH_TURN_SPEED_DEFAULT,  40,     15,  90.0, 650.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
+    {SEARCH_TURN_SPEED_DEFAULT,  40,     15, -90.0, 650.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
 };
 
 TurnParameters turn_params_faster[4] = {
-    //           speed, entry,   exit, angle, omega,  alpha, sensor threshold
-    {SEARCH_TURN_SPEED_DEFAULT,  15,     5,  90.0, 300.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
-    {SEARCH_TURN_SPEED_DEFAULT,  15,     5, -90.0, 300.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
-    {SEARCH_TURN_SPEED_DEFAULT,  15,     5,  90.0, 300.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
-    {SEARCH_TURN_SPEED_DEFAULT,  15,     5, -90.0, 300.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
+    //                  speed, entry,   exit, angle, omega,  alpha, sensor threshold
+    {SEARCH_TURN_SPEED_DEFAULT,  35,     15,  90.0, 550.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
+    {SEARCH_TURN_SPEED_DEFAULT,  35,     15, -90.0, 550.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
+    {SEARCH_TURN_SPEED_DEFAULT,  35,     15,  90.0, 550.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
+    {SEARCH_TURN_SPEED_DEFAULT,  35,     15, -90.0, 550.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
 };
 
 TurnParameters turn_params_speed_run[4] = {
-    //           speed, entry,   exit, angle, omega,  alpha, sensor threshold
-    {SEARCH_TURN_SPEED_DEFAULT,  15,     5,  90.0, 350.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
-    {SEARCH_TURN_SPEED_DEFAULT,  15,     5, -90.0, 350.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
-    {SEARCH_TURN_SPEED_DEFAULT,  15,     5,  90.0, 350.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
-    {SEARCH_TURN_SPEED_DEFAULT,  15,     5, -90.0, 350.0, 4000.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
+    //                  speed, entry,   exit, angle, omega,  alpha, sensor threshold
+    {SEARCH_TURN_SPEED_DEFAULT,  35,     15,  90.0, 550.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90EL
+    {SEARCH_TURN_SPEED_DEFAULT,  35,     15, -90.0, 550.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90ER
+    {SEARCH_TURN_SPEED_DEFAULT,  35,     15,  90.0, 550.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90L
+    {SEARCH_TURN_SPEED_DEFAULT,  35,     15, -90.0, 550.0, 7500.0, TURN_THRESHOLD_SS90E}, // 0 => SS90R
 };
 
 TurnParameters *turn_params = turn_params_base;

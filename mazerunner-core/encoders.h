@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include "config.h"
 #include "quadrature.h"
+#include "fifo_averager.h"
 
 Quadrature_encoder<ENCODER_LEFT_CLK, ENCODER_LEFT_B> encoder_l;
 Quadrature_encoder<ENCODER_RIGHT_CLK, ENCODER_RIGHT_B> encoder_r;
@@ -68,6 +69,8 @@ class Encoders {
       encoder_r.reset_count();
       m_robot_distance = 0;
       m_robot_angle = 0;
+      m_left_averager.reset();
+      m_right_averager.reset();
     }
   }
 
@@ -127,8 +130,8 @@ class Encoders {
     #ifdef ENCODER_RIGHT_POLARITY
     right_delta *= ENCODER_RIGHT_POLARITY;
     #endif
-    float left_change = left_delta * MM_PER_COUNT_LEFT;
-    float right_change = right_delta * MM_PER_COUNT_RIGHT;
+    float left_change = m_left_averager.update(left_delta) * MM_PER_COUNT_LEFT;
+    float right_change = m_right_averager.update(right_delta) * MM_PER_COUNT_RIGHT;
     m_fwd_change = 0.5 * (right_change + left_change);
     m_robot_distance += m_fwd_change;
     m_rot_change = (right_change - left_change) * DEG_PER_MM_DIFFERENCE;
@@ -208,6 +211,8 @@ class Encoders {
   volatile float m_robot_angle;
   // the change in distance or angle in the last tick.
   float m_fwd_change;
+  FifoAverager<ENCODER_AVERAGER_LENGTH> m_left_averager;
+  FifoAverager<ENCODER_AVERAGER_LENGTH> m_right_averager;
   float m_rot_change;
   // internal use only to track encoder input edges
   //int m_left_counter;

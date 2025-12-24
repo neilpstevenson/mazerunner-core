@@ -38,11 +38,11 @@ class Battery {
   void update() {
     // Half Monty has no battery ADC
     //m_adc_value = adc.get_dark(m_adc_channel);
-    m_battery_volts = 7; //BATTERY_MULTIPLIER * m_adc_value;
+    m_battery_volts = MAX_MOTOR_VOLTS; //BATTERY_MULTIPLIER * m_adc_value;
   }
 
   float voltage() {
-    return 7; //m_battery_volts;
+    return MAX_MOTOR_VOLTS; //m_battery_volts;
   }
 
  private:
