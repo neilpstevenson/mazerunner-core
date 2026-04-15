@@ -154,7 +154,7 @@ class Mouse {
     ATOMIC {
       motion.set_target_velocity(params.speed);
       //forward.set_speed((params.speed + forward.speed())/2);    // Brutal slow down!
-      forward.set_speed(params.speed);    // Brutal slow down!
+      //forward.set_speed(params.speed);    // Brutal slow down!
     }
 
     float trigger = params.trigger;
