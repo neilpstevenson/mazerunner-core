@@ -79,8 +79,8 @@ struct SpeedParameters {
 #define EVENT_APEC 4
 
 // choose the one you will be using BEFORE selecting the robot below
-//#define EVENT EVENT_UK
-#define EVENT EVENT_HOME
+#define EVENT EVENT_UK
+//#define EVENT EVENT_HOME
 
 #if EVENT == EVENT_HOME
 #define GOAL Location(3, 7)
@@ -111,7 +111,7 @@ struct SpeedParameters {
 #define ROBOT_HALF_MONTY_2 7
 
 /// this is the variant you are building for.
-#define ROBOT ROBOT_HALF_MONTY_2
+#define ROBOT ROBOT_MONTY_MINI
 
 #if ROBOT == ROBOT_CORE_OSMIUM
 #include "config-robot-osmium.h"

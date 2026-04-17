@@ -279,6 +279,8 @@ const float STEERING_ADJUST_LIMIT = 10.0;  // deg/s
 // search and run speeds in mm/s and mm
 const int SEARCH_SPEED_DEFAULT = 500;
 const int SEARCH_ACCELERATION_DEFAULT = 2000;
+#define SEARCH_ACCEL_HALF_CELL(speed) (speed*speed/(90-10)/2)   // Acceleration to stop in half a cell - 10
+
 const int SEARCH_TURN_SPEED_DEFAULT = 300;
 //const int SMOOTH_TURN_SPEED = 500;
 //const int FAST_TURN_SPEED = 600;
