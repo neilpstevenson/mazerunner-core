@@ -346,8 +346,19 @@ SpeedParameters speed_parameters_speed_run = {
   SEARCH_ACCEL_HALF_CELL(300),  // mm/s/s  - acceleration
   500,                          // mm/s    - forward speed 2 cells or more
   50,                           // mm/s    - back-up speed (alignment move)
-  860,                          // deg/s   - maximum angular velocity
-  8600                          // deg/s/s - angular acceleration
+  720,                          // deg/s   - maximum angular velocity
+  7200                          // deg/s/s - angular acceleration
+};
+
+SpeedParameters speed_parameters_wall_follow = {
+  false,                        // true to search, false to do a speed-run only
+  true,                         // true to use smooth turns, false for in-place turns
+  300,                          // mm/s    - forward speed one cell
+  SEARCH_ACCEL_HALF_CELL(300),  // mm/s/s  - acceleration
+  500,                          // mm/s    - forward speed 2 cells or more
+  50,                           // mm/s    - back-up speed (alignment move)
+  720,                          // deg/s   - maximum angular velocity
+  7200                          // deg/s/s - angular acceleration
 };
 
 SpeedParameters *speed_parameters = &speed_parameters_base;

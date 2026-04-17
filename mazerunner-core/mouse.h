@@ -287,9 +287,9 @@ class Mouse {
   void move_ahead() {
     // How many cells can we move?
     int cell_count = maze.count_cells_ahead(m_location, m_heading);
-    SerialPort.println();
-    SerialPort.print("Cells ahead: ");
-    SerialPort.println(cell_count);
+    //SerialPort.println();
+    //SerialPort.print("Cells ahead: ");
+    //SerialPort.println(cell_count);
 
     ATOMIC {
       float current_position = motion.position();
@@ -305,8 +305,8 @@ class Mouse {
     for(int cell = 0; cell < cell_count; cell++)
     {
       motion.wait_until_position(SENSING_POSITION + cell*FULL_CELL);
-      SerialPort.print("Reached cell: ");
-      SerialPort.println(cell+1);
+      //SerialPort.print("Reached cell: ");
+      //SerialPort.println(cell+1);
       // Don't move ahead on the last cell - will automatically do that in the main loop
       if(cell < cell_count-1)
       {
@@ -431,6 +431,12 @@ class Mouse {
     sensors.enable();
     motion.reset_drive_system();
     sensors.set_steering_mode(STEERING_OFF);
+    if (not m_handStart) {
+      // back up to the wall behind
+      // TODO: what if there is not a wall?
+      // perhaps the caller should decide so this ALWAYS starts at the cell centre?
+      motion.move(-BACK_WALL_TO_CENTER, speed_parameters->backing_speed, 0, speed_parameters->acceleration);
+    }
     motion.move(BACK_WALL_TO_CENTER, speed_parameters->forward_speed, speed_parameters->forward_speed, speed_parameters->acceleration);
     motion.set_position(HALF_CELL);
     SerialPort.println(F("Off we go..."));
@@ -484,6 +490,17 @@ class Mouse {
     indicators.blink(4, 0, 16, 0); // Green
   }
 
+  /***
+    Seach the maze by wall-following and back again
+  ****/
+  void wall_follow()
+  {
+      mouse.m_handStart = true;
+      mouse.follow_to(maze.goal());
+      m_handStart = false;  // Assumes central in a cell
+      mouse.follow_to(START);
+  }
+  
   /***
    * This function moves the mouse from the start position to a target location
    * which is specified as a distance from the start position.

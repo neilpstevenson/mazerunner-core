@@ -404,7 +404,9 @@ class CommandLineInterface {
         mouse.test_log_position_sensors();
         break;
       case 11: {
-        mouse.follow_to(maze.goal());
+        speed_parameters = &speed_parameters_wall_follow;
+        turn_params = turn_params_speed_run;
+        mouse.wall_follow();
       } break;
       case 12:
         mouse.test_SS90E();
