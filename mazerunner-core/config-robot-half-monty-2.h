@@ -88,12 +88,12 @@ const int OCCLUDED_THRESHOLD_FRONT_RAW = FRONT_LEFT_CALIBRATION * 1.5;
 // wall sensor thresholds and constants
 // RAW values for the front sensor when the robot is backed up to a wall
 // with another wall ahead
-const int FRONT_LEFT_CALIBRATION = 1560; //1486;
-const int FRONT_RIGHT_CALIBRATION = 2060; //1932;
+const int FRONT_LEFT_CALIBRATION = 733;
+const int FRONT_RIGHT_CALIBRATION = 786;
 // RAW values for the side sensors when the robot is centered in a cell
 // and there is no wall ahead
-const int LEFT_CALIBRATION = 2730; //2475;
-const int RIGHT_CALIBRATION = 1990; //1737;
+const int LEFT_CALIBRATION = 2240;
+const int RIGHT_CALIBRATION = 1763;
 
 // The front linear constant is the value of k needed to make the function
 // sensors.get_distance(sensor,k) return 68mm (half=30mm) when the mouse is backed up
@@ -105,11 +105,11 @@ const int FRONT_REFERENCE = 350; //350;  // sum reading when mouse centered with
 // it changes a bit if there is an adjacent wall. The threshold is set for
 // when the robot is 20mm past the cell boundary. That is, the distance
 // from the front of the mouse to the wall ahead is 92mm (half=50mm)
-const int TURN_THRESHOLD_SS90E = 122; //118;
+const int TURN_THRESHOLD_SS90E = 180; //122; //118;
 const int EXTRA_WALL_ADJUST = 5; //3;
 
 // Threshold used for starting the robot runs
-const int OCCLUDED_THRESHOLD_FRONT_RAW = 2500;
+const int OCCLUDED_THRESHOLD_FRONT_RAW = FRONT_LEFT_CALIBRATION * 1.5;
 
 #endif
 

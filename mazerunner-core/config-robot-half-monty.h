@@ -306,7 +306,7 @@ const float RIGHT_SCALE = (float)SIDE_NOMINAL / RIGHT_CALIBRATION;
 // the values above which, a wall is seen
 const int LEFT_THRESHOLD = 55; //55;   // minimum value to register a wall
 const int RIGHT_THRESHOLD = 55; //55;  // minimum value to register a wall
-const int FRONT_THRESHOLD = 55; //65; //48; //60;  // minimum value to register a wall
+const int FRONT_THRESHOLD = 60; //65; //48; //60;  // minimum value to register a wall
 
 // the distance through the cell at which the corresponding sensor
 // will see a falling edge
