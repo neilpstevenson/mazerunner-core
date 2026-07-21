@@ -405,7 +405,7 @@ class CommandLineInterface {
         break;
       case 11: {
         speed_parameters = &speed_parameters_wall_follow;
-        turn_params = turn_params_speed_run;
+        turn_params = turn_params_faster;
         mouse.wall_follow();
       } break;
       case 12:
